@@ -230,7 +230,9 @@ details.plant .body { padding: 0 1rem 1rem; }
 .btn-bak { flex: 0 0 auto !important; min-width: 7rem; }
 .fas-knapp { background: none; border: 0; padding: 0; color: inherit; font: inherit; text-decoration: underline dotted; }
 .fas-knapp:hover { color: var(--acc-hi); }
-.faskort .nr { display: inline-flex; align-items: center; justify-content: center; width: 1.3rem; height: 1.3rem; border-radius: 9999px; background: var(--acc-bg); color: var(--acc); font-size: .78rem; font-weight: 700; margin-bottom: .25rem; }
+.faskort .nr { grid-column: 1; grid-row: 1 / 3; align-self: stretch; display: flex; align-items: center; justify-content: center;
+  min-width: 2.3rem; padding: 0 .35rem; border-radius: .5rem; background: var(--acc-bg); color: var(--acc);
+  font-size: 1.6rem; font-weight: 700; line-height: 1; }
 .ledtrad { border: 1px dashed var(--line); background: rgba(15,23,42,.5); border-radius: .9rem; padding: .7rem .9rem; margin: 0 0 .9rem; color: var(--soft); }
 .ledtrad-h { display: block; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--acc-hi); margin-bottom: .2rem; }
 /* the scene: what you are doing and seeing, right before the decision */
@@ -292,11 +294,11 @@ details.plant .body { padding: 0 1rem 1rem; }
 .repetera .larom { margin-top: .4rem; font-size: .93rem; }
 /* the six stages, shown as a map on the start page and as a strip during a run */
 .faskarta { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .5rem; margin-top: 1rem; align-items: stretch; }
+/* the number is a full-height block down the left edge, with the two lines of text beside it */
 .faskort { border: 1px solid var(--panel2); border-radius: .7rem; padding: .7rem .85rem; background: var(--bg);
-  display: flex; flex-direction: column; gap: .15rem; }
-.faskort b { display: block; font-size: .95rem; color: #fff; line-height: 1.25; }
-.faskort span { font-size: .85rem; color: var(--muted); line-height: 1.3; }
-.faskort .nr { flex: none; }
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: .75rem; row-gap: .15rem; align-items: center; }
+.faskort b { grid-column: 2; align-self: end; font-size: .95rem; color: #fff; line-height: 1.25; }
+.faskort > span:not(.nr) { grid-column: 2; align-self: start; font-size: .85rem; color: var(--muted); line-height: 1.3; }
 .faslista { display: flex; flex-wrap: wrap; gap: .3rem .5rem; list-style: none; padding: 0; margin: .1rem 0 .9rem; font-size: .78rem; }
 .faslista li { color: var(--muted); }
 .faslista li + li::before { content: '→'; margin-right: .5rem; color: var(--line); }
@@ -313,6 +315,9 @@ details.plant .body { padding: 0 1rem 1rem; }
 .spar-h .ico { font-size: 1.7rem; }
 .spar-h b { font-size: 1.15rem; color: #fff; display: block; }
 .spar-kort { font-size: .82rem; color: var(--acc); letter-spacing: .04em; text-transform: uppercase; font-weight: 700; }
+/* this is the explanation of what the whole track is about — it is read, not skimmed,
+   so it gets full body size rather than the .small it used to share with captions */
+.spar-text { font-size: 1rem; line-height: 1.55; color: var(--soft); margin: .2rem 0 0; }
 .tidslinje { list-style: none; margin: .9rem 0 0; padding: 0 0 0 1.3rem; border-left: 2px solid var(--panel2); }
 .tidslinje li { position: relative; margin-bottom: .45rem; }
 .tidslinje li::before { content: ''; position: absolute; left: -1.75rem; top: 1.1rem; width: .65rem; height: .65rem; border-radius: 9999px;
@@ -414,8 +419,12 @@ ul.begrepp li { margin: .1rem 0; }
   .detail-structs .mol-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .9rem; }
   .modal .sheet { max-width: 1240px; padding: 1.5rem 1.75rem 2rem; }
   main[data-view="quiz"] > .card, main[data-view="kort"] > .card, main[data-view="para"] > *, main[data-view="resa"] > .card { max-width: 1200px; margin-left: auto; margin-right: auto; }
-  /* the run: the evidence on the left, the decision on the right */
-  .resa-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+  /* the run: the evidence on the left, the decision on the right, the journal under it */
+  .resa-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; align-items: start;
+    grid-template-areas: "lasa sida" "lasa logg"; }
+  .resa-lasa { grid-area: lasa; }
+  .resa-sida { grid-area: sida; }
+  .resa-logg { grid-area: logg; }
   .resa-split .opts:not(.opts-mol) { grid-template-columns: 1fr; }   /* one option per row: they are sentences */
   .resa-sida .q-text { margin-top: 0; }
   /* the reveal: molecule on the left at its own size, what became of it on the right */
@@ -3596,7 +3605,7 @@ const tidslinjeHTML = (nyckel) => {
   const start = sparStart(nyckel), pabörjat = gjorda > 0;
   return `<div class="spar">
     <div class="spar-h"><span class="ico">${sp.ikon}</span><div><b>${sp.namn}</b><span class="spar-kort">${sp.kort}</span></div></div>
-    <p class="small">${sp.text}</p>
+    <p class="spar-text">${sp.text}</p>
     <div class="btn-row" style="margin-top:.7rem">
       <button class="btn btn-main" onclick="startResa('${start.id}')">▶ ${gjorda === fall.length ? 'Gör om spåret' : pabörjat ? 'Fortsätt' : 'Börja här'}: ${start.ar} — ${start.titel}</button>
     </div>
@@ -3686,6 +3695,10 @@ function renderResa() {
          (question, options, feedback). Both columns then carry weight on a wide screen,
          and in one column on a phone the order still reads scene → findings → question. -->
     <div class="resa-split">
+      <!-- The journal comes first in the source so that on a phone it sits right under the
+           observation, where what you have established so far is worth having before you read
+           on. On desktop grid-areas put it back under the question in the right column. -->
+      <div class="resa-logg">${loggHTML()}</div>
       <div class="resa-lasa">
         ${(BERATTELSER[resa.id] || {})[fas.key] ? `<div class="berattelse">${BERATTELSER[resa.id][fas.key]}</div>` : ''}
         <div class="ledtrad"><b class="ledtrad-h">Det du har att gå på</b><ul>${st.data.map(d => `<li>${d}</li>`).join('')}</ul></div>
@@ -3696,10 +3709,7 @@ function renderResa() {
         <div class="q-text">${st.fraga}</div>
         <div class="opts">${mitt.val.map((o, k) => `<button class="opt" data-k="${k}">${o.html}</button>`).join('')}</div>
         <div id="rfb"></div>
-        <div class="resa-stod">
-          <details class="repetera"><summary>↺ Läs om hur steget går till</summary><div class="larom">${fas.larom}</div></details>
-          ${loggHTML()}
-        </div>
+        <details class="repetera"><summary>↺ Läs om hur steget går till</summary><div class="larom">${fas.larom}</div></details>
       </div>
     </div>
     <div class="btn-row" id="rbakwrap">${tillbaka}</div></div>`;
@@ -3732,10 +3742,10 @@ function visaSvar() {
       <button class="btn btn-main" id="rnext">${resa.i + 1 < FASER.length ? 'Nästa steg ➜' : 'Se vad du hittade ➜'}</button></div>`;
   const bakwrap = $('#rbakwrap');          // the lone back button is replaced by the row below
   if (bakwrap) bakwrap.remove();
-  // only the support box is redrawn — the question and the options above it must stay put.
-  // (figurFor, not FIG: the soil-to-plate drawing must not reappear on an animal journey.)
-  const stod = app.querySelector('.resa-stod');
-  if (stod) stod.innerHTML = `<details class="repetera"><summary>↺ Läs om hur steget går till</summary><div class="larom">${fas.larom}</div></details>${loggHTML()}`;
+  // only the journal is redrawn — it has just gained this stage's finding. Everything else on
+  // the page must stay put, the question and the options above all.
+  const logg = app.querySelector('.resa-logg');
+  if (logg) logg.innerHTML = loggHTML();
   $('#rnext').addEventListener('click', () => { resa.i++; resa.vy = svarat(resa.i) ? 'fraga' : 'larom'; renderResa(); });
   $('#rnext').focus({ preventScroll: true });
   $('#rnext').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
