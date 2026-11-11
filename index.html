@@ -100,9 +100,13 @@ p { margin: .3rem 0 .7rem; }
 .maste { border: 1px solid var(--line); background: rgba(15, 23, 42, .55); border-radius: .9rem; padding: .8rem 1rem; margin-bottom: 1rem; }
 .maste-h { font-weight: 700; color: var(--soft); margin-bottom: .3rem; }
 .maste dl { margin: 0; }
-.maste .mrow { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: .6rem; padding: .25rem 0; border-top: 1px solid var(--panel2); }
+/* 12.5rem because the longest label, STRUKTURBESTÄMNING, is one unbreakable word that
+   would otherwise spill into the text column instead of wrapping */
+.maste .mrow { display: grid; grid-template-columns: 12.5rem minmax(0, 1fr); gap: .6rem; padding: .25rem 0; border-top: 1px solid var(--panel2); }
 .maste .mrow:first-child { border-top: 0; }
-.maste dt { font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--acc-hi); padding-top: .15rem; }
+/* flex, so a long label like "Strukturbestämning" wraps BESIDE the number rather than
+   dropping to the line underneath it */
+.maste dt { display: flex; align-items: flex-start; gap: .4rem; font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--acc-hi); padding-top: .15rem; }
 .maste dd { margin: 0; }
 @media (max-width: 480px) { .maste .mrow { grid-template-columns: 1fr; gap: 0; } }
 .mol-cap .bio { display: block; font-size: .78rem; color: var(--muted); margin-top: .1rem; }
@@ -162,6 +166,13 @@ details.plant .body { padding: 0 1rem 1rem; }
 .opt:disabled { cursor: default; }
 .opt.ok { border-color: var(--acc); background: var(--acc-bg); color: #d1fae5; }
 .opt.bad { border-color: var(--bad); background: var(--bad-bg); color: #ffe4e6; }
+/* the option whose explanation is showing — may be the answer given or one being explored */
+.opt.visas { box-shadow: 0 0 0 3px #94a3b8; }
+.utforska-tips { margin: .8rem 0 0; font-size: .85rem; color: var(--muted); }
+/* the English name of a method, set beside the Swedish one — nearly all the literature
+   the students meet uses the English term, so they need to recognise both as one thing */
+.eng { font-size: .85em; color: var(--acc-hi); white-space: nowrap; }
+.eng::before { content: '· '; color: var(--muted); }
 .feedback { margin-top: .9rem; padding: .8rem 1rem; border-radius: .9rem; font-weight: 700; }
 .feedback.ok { background: var(--acc-bg); border: 1px solid var(--acc); color: #d1fae5; }
 .feedback.bad { background: var(--bad-bg); border: 1px solid var(--bad); color: #ffe4e6; }
@@ -464,8 +475,8 @@ ul.begrepp li { margin: .1rem 0; }
 .slut-logg { margin-top: 1.2rem; }
 .slut-logg .maste { margin-bottom: 0; }
 /* the numbered step in the sidebar journal during a run */
-.logg-nr { display: inline-flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem;
-  border-radius: 9999px; background: var(--acc-bg); color: var(--acc); font-size: .75rem; margin-right: .4rem; vertical-align: -.2rem; }
+.logg-nr { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 1.25rem; height: 1.25rem;
+  border-radius: 9999px; background: var(--acc-bg); color: var(--acc); font-size: .75rem; }
 /* the end-of-run chain: numbered steps with an arrow between each pair */
 .kedja { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .9rem; }
 .kedja-steg { position: relative; border: 1px solid var(--panel2); border-radius: .8rem; padding: .7rem .85rem .75rem; background: var(--bg); }
@@ -592,7 +603,7 @@ const SUBSTANSER = [
     svar: ['Penicillin V är syrastabilt; penicillin G bryts ner av magsyran', 'Penicillin V tål β-laktamas; penicillin G gör det inte', 'Penicillin G är för stort för att tas upp i tarmen', 'Penicillin V är ett cefalosporin, penicillin G ett penicillin'] }],
   nycklar: [{ etikett: 'allvarliga bakterieinfektioner', ord: ['infekt', 'bakter', 'pneumoni', 'lunginflam', 'sepsis', 'blodförgift', 'meningit', 'hjärnhinne', 'strepto', 'pneumokock'] },
             { etikett: 'ges som injektion/infusion', ord: ['injekt', 'inject', 'infusion', 'intraven', 'parenter', 'dropp'], valfri: true }],
-  kolla: ['Artnamn: quizen godtar <i>P. chrysogenum</i>, <i>P. rubens</i> och <i>P. notatum</i>. Vilket namn vill du att studenterna ska kunna?', 'Inga preparatnamn angivna: lägg gärna till det aktuella svenska handelsnamnet från FASS.']
+  kolla: ['Artnamn: quizen godtar <i>P. chrysogenum</i>, <i>P. rubens</i> och <i>P. notatum</i>. Vilket namn vill du att studenterna ska kunna?', 'Penicillin G ges som injektion; preparatnamn behövs inte längre eftersom de varken visas eller frågas.']
 },
 {
   id: 'penV', namn: 'fenoximetylpenicillin (penicillin V)', grupp: 'svamp',
@@ -799,11 +810,11 @@ const SUBSTANSER = [
 },
 {
   id: 'doxycyklin', namn: 'doxycyklin', grupp: 'bakterie',
-  latin: 'Streptomyces aureofaciens', latinAlt: ['Streptomyces rimosus'], sv: 'jordbakterie (aktinobakterie)',
-  kallaText: 'Semisyntetiskt, görs av oxytetracyklin eller metacyklin från <i>Streptomyces</i>.',
+  latin: 'Streptomyces rimosus', latinAlt: ['Streptomyces aureofaciens'], sv: 'jordbakterie (aktinobakterie)',
+  kallaText: 'Semisyntetiskt, och råvaran är <i>oxytetracyklin</i> från <i>S. rimosus</i> — inte klortetracyklinet som tetracyklin görs av. Omvandlingen går via mellansteget metacyklin.',
   fam: 'tetracyklin', klass: 'tetracyklin (aromatisk polyketid)', bio: 'PKS2', vagar: ['ACET'],
   bioNot: 'Grundskelettet byggs som tetracyklinets, av ett polyketidsyntas typ II.',
-  framst: 'semi', framstText: 'OH-gruppen vid kol 6 tas bort, vilket gör molekylen stabilare och fettlösligare.',
+  framst: 'semi', framstText: 'Oxytetracyklinets OH-grupp vid kol 6 tas bort (via metacyklin, som hydreras), vilket gör molekylen stabilare och fettlösligare.',
   mg: 'ribosom30t', mekKort: 'blockerar 30S-subenheten så att tRNA inte kan binda',
   mek: 'Som tetracyklin: binder 30S-subenheten och hindrar aminoacyl-tRNA från att nå A-platsen. Bakteriostatiskt, brett spektrum.',
   tema: ['bredspektrum', 'malaria'], anvKort: ['borrelia (fästingburen)', 'akne och rosacea', 'malariaprofylax'],
@@ -885,7 +896,7 @@ const SUBSTANSER = [
   bioNot: 'Ett modulärt polyketidsyntas bygger en stor laktonring. Den har en styv del med sju konjugerade dubbelbindningar (polyen, fettlöslig) och en motsatt sida full av OH-grupper (vattenlöslig) — därav namnet amfo-tericin. Sockret mykosamin sätts på.',
   framst: 'naturlig', framstText: 'Finns också inkapslat i liposomer, vilket minskar njurskadan.',
   mg: 'ergosterol', mekKort: 'binder ergosterol i svampens cellmembran och gör porer',
-  mek: 'Binder ergosterol, svampcellmembranets huvudsterol. Flera molekyler bildar en por genom membranet, så att kalium och andra joner läcker ut och svampcellen dör. Människans membran har kolesterol i stället, som binds svagare — men inte tillräckligt svagt för att biverkningarna ska försvinna.',
+  mek: 'Binder ergosterol, svampcellmembranets huvudsterol. Enligt den klassiska bilden ställer sig flera molekyler i en por genom membranet, så att kalium och andra joner läcker ut och svampcellen dör; nyare arbeten talar för att ämnet framför allt klumpar ihop sig utanför membranet och drar ut ergosterolet ur det. Båda mekanismerna diskuteras. Människans membran har kolesterol i stället, som binds svagare — men inte tillräckligt svagt för att biverkningarna ska försvinna.',
   tema: ['svampinfektion'], anvKort: ['livshotande systemiska svampinfektioner'],
   anv: 'Ges som infusion vid livshotande svampinfektioner i blod och inre organ, t.ex. invasiv candida- eller aspergillusinfektion, hos patienter med nedsatt immunförsvar.',
   bivKort: ['njurskada (nefrotoxicitet)', 'frossa och feber under infusionen', 'kaliumförlust'],
@@ -1003,12 +1014,12 @@ const SUBSTANSER = [
 {
   id: 'insulin', namn: 'insulin', grupp: 'djur',
   latin: 'Sus scrofa', latinAlt: ['Bos taurus'], sv: 'tamsvin (och nötkreatur)',
-  kallaText: 'Insulin utvanns ursprungligen ur bukspottkörtlar från slaktade grisar och nötkreatur — det krävdes omkring två ton körtlar för ett kilo insulin. Sedan 1982 tillverkas humant insulin i stället rekombinant.',
+  kallaText: 'Insulin utvanns ursprungligen ur bukspottkörtlar från slaktade grisar och nötkreatur — utbytet var försvinnande litet, och ur två ton körtlar fick man bara några hundra gram insulin. Sedan 1982 tillverkas humant insulin i stället rekombinant.',
   fam: 'insulin', klass: 'peptidhormon, 51 aminosyror i två kedjor', bio: 'RIB', vagar: ['ALK'],
   bioNot: 'Ribosomal peptid: byggs som preproinsulin och klipps till proinsulin och sedan till färdigt insulin, där A- och B-kedjan hålls ihop av två disulfidbryggor.',
   framst: 'rek', framstText: 'Genen för humant insulin sätts in i <i>E. coli</i> eller jäst, som tillverkar proteinet. Det var det första rekombinanta läkemedlet (1982). Moderna insulinanaloger har dessutom enstaka aminosyror utbytta för att ändra hur snabbt insulinet tas upp.',
   mg: 'insulinrec', mekKort: 'aktiverar insulinreceptorn → cellerna tar upp glukos',
-  mek: 'Binder insulinreceptorn på cellytan, ett tyrosinkinas. Musk-, fett- och leverceller tar upp glukos ur blodet, levern slutar frisätta glukos och börjar lagra glykogen. Blodsockret sjunker.',
+  mek: 'Binder insulinreceptorn på cellytan, ett tyrosinkinas. Muskel-, fett- och leverceller tar upp glukos ur blodet, levern slutar frisätta glukos och börjar lagra glykogen. Blodsockret sjunker.',
   tema: ['diabetes'], anvKort: ['typ 1-diabetes (livsnödvändigt)', 'typ 2-diabetes när annan behandling inte räcker'],
   anv: 'Livsnödvändig behandling vid typ 1-diabetes, där kroppen inte bildar något eget insulin, och vid typ 2-diabetes när tabletter och andra injektionsläkemedel inte räcker. Ges som injektion under huden, oftast som en kombination av långverkande basinsulin och snabbverkande måltidsinsulin.',
   bivKort: ['hypoglykemi (lågt blodsocker)', 'viktuppgång', 'reaktioner på injektionsstället'],
@@ -1113,12 +1124,13 @@ const SUBSTANSER = [
   biv: 'Blödning är den viktigaste risken, från blåmärken till allvarlig blödning. Lågt antal blodplättar (trombocytopeni) förekommer och kontrolleras med blodprov.',
   preparat: ['Integrilin'],
   sekvens: { namn: 'eptifibatid', amid: true,
-    rester: ['Mpa','H','G','D','W','P','C'],
-    forkl: { Mpa: 'merkaptopropionsyra: inte en aminosyra, utan den del som bildar ringen med cysteinet' },
+    rester: ['Mpa','Har','G','D','W','P','C'],
+    forkl: { Mpa: 'merkaptopropionsyra: inte en aminosyra, utan den del som bildar ringen med cysteinet',
+             Har: 'homoarginin: lysin med en guanidingrupp påhängd, alltså inte någon av de 20 vanliga aminosyrorna' },
     not: 'Ringformad: en disulfidbrygga mellan merkaptopropionsyran (Mpa) i början och cysteinet (C) i slutet sluter ringen. Mitt i sitter nyckelmotivet <b>homoarginin-glycin-asparaginsyra</b>, byggt efter ormpeptidens KGD-motiv — det är det som passar in i GPIIb/IIIa-receptorn.' },
   skillnad: { hirudin: 'Målet skiljer sig. Eptifibatid blockerar <b>blodplättarnas</b> receptor GPIIb/IIIa, så plättarna inte klibbar ihop. Hirudin och bivalirudin hämmar i stället enzymet <b>trombin</b>, så fibrin inte bildas. Källan: eptifibatid har ormgift som förebild, hirudin kommer från blodigelns saliv.' },
   nycklar: [{ etikett: 'hjärtinfarkt eller instabil kärlkramp', ord: ['infarkt', 'hjärt', 'angina', 'kärlkramp', 'kranskärl', 'pci', 'ballong', 'propp'] }],
-  kolla: ['Jag anger dvärgskallerorm (<i>Sistrurus miliarius barbouri</i>) som källa till barbourin. Kontrollera underarten om du vill ha den i skrivfrågor.', 'Preparatnamnet Integrilin.', 'Eptifibatid innehåller homoarginin, som jag visar som pärlan H i sekvensen; H står normalt för histidin. Säg till om du vill ha en annan märkning.']
+  kolla: ['Jag anger dvärgskallerorm (<i>Sistrurus miliarius barbouri</i>) som källa till barbourin. Kontrollera underarten om du vill ha den i skrivfrågor.', 'Preparatnamnet Integrilin.', 'Eptifibatid innehåller homoarginin. Pärlan visade tidigare H, vilket läses som histidin; den är rättad till Har med en egen förklaring.']
 },
 {
   id: 'hirudin', namn: 'hirudin (och bivalirudin)', grupp: 'djur',
@@ -1136,7 +1148,8 @@ const SUBSTANSER = [
   preparat: ['Angiox'],
   extra: 'Levande iglar används fortfarande ibland i plastikkirurgin, för att hålla blodflödet igång i omplanterad vävnad.',
   sekvens: { namn: 'bivalirudin (den syntetiska korta varianten)',
-    rester: ['D','F','P','R','P','G','G','G','G','N','G','D','F','E','E','I','P','E','E','Y','L'],
+    rester: ['D-Phe','P','R','P','G','G','G','G','N','G','D','F','E','E','I','P','E','E','Y','L'],
+    forkl: { 'D-Phe': 'D-fenylalanin: spegelbilden av den vanliga L-formen. Den gör änden svår för kroppens peptidaser att klyva.' },
     not: 'De fyra glycinerna (G-G-G-G) i mitten är en böjlig länk mellan de två delar som tagits från hirudin: början binder trombins aktiva säte, slutet binder sidosätet. Just därför kallas den <b>bi</b>valirudin — den binder på två ställen samtidigt.' },
   skillnad: { eptifibatid: 'Målet skiljer sig: hirudin och bivalirudin hämmar enzymet <b>trombin</b> (så fibrin inte bildas), eptifibatid blockerar <b>blodplättarnas</b> receptor GPIIb/IIIa (så plättarna inte klibbar ihop). Båda ges som infusion, och blödning är huvudrisken för båda.' },
   kontraster: [{ q: 'Vad skiljer hirudin och bivalirudin från heparin?',
@@ -1339,19 +1352,20 @@ const FASER = [
       </dl>
       <p>Vet man inte vad man har, extraherar man <b>stegvis</b> med allt polärare lösningsmedel och testar varje extrakt i bioassayen. Då ger extraktionen också ett första besked om vad ämnet är för sorts molekyl.</p>
       <p>För <b>syror och baser</b> hänger valet dessutom på pH. En syra är <b>oladdad</b> i surt och <b>laddad</b> i basiskt; en bas tvärtom. Den oladdade formen är fettlöslig och följer med ett organiskt lösningsmedel, den laddade stannar i vattnet. Genom att ställa in pH bestämmer man alltså var ämnet helst vill vara. Hur långt det går beror på hur stark gruppen är: en vanlig amin är oladdad redan vid pH 9, medan en guanidingrupp är laddad i allt vatten man kan arbeta i. pH kan också ändra själva molekylen — en lakton öppnas av bas genom hydrolys till en fri syra.</p>
-      <p>Och är ämnet så polärt eller så laddat att inget lösningsmedel vill ta det, får man byta princip: binda ämnet till en <b>adsorptionsresin</b> och sedan <b>eluera</b> det därifrån.</p>
+      <p>Och är ämnet så polärt eller så laddat att inget lösningsmedel vill ta det, får man byta princip: binda ämnet till en <b>adsorptionsresin</b> <span class="eng">adsorption resin</span> och sedan <b>eluera</b> <span class="eng">elute</span> det därifrån.</p>
       <p>Och en sak till: <b>ämnet ska överleva</b>. Värme, syre, ljus och extrema pH-värden bryter ner många naturprodukter, proteiner denaturerar av organiska lösningsmedel, och material som bukspottkörtel innehåller egna enzymer som bryter ner ämnet medan man arbetar. Ofta väljs metoden lika mycket för att skona ämnet som för att lösa ut det.</p>` },
   { key: 'kromatografi', rubrik: 'Separation', kort: 'Skilja ämnet från allt annat',
     larom: `<p>Extraktet innehåller fortfarande hundratals ämnen. Nu ska de separeras.</p>
-      <p>Den enklaste separationsmetoden är <b>vätske–vätskeextraktion</b>. Två lösningsmedel som inte blandar sig — oftast vatten och ett organiskt — skakas ihop i en skiljetratt. Varje ämne fördelar sig mellan skikten efter var det löser sig bäst, skikten tappas av var för sig, och man upprepar. Ingen kolonn, ingen utrustning att tala om, och ändå blir man av med en stor del av orenheterna.</p>
+      <p>Den enklaste separationsmetoden är <b>vätske–vätskeextraktion</b> <span class="eng">liquid–liquid extraction, LLE</span>. Två lösningsmedel som inte blandar sig — oftast vatten och ett organiskt — skakas ihop i en skiljetratt. Varje ämne fördelar sig mellan skikten efter var det löser sig bäst, skikten tappas av var för sig, och man upprepar. Ingen kolonn, ingen utrustning att tala om, och ändå blir man av med en stor del av orenheterna.</p>
       <p>För syror och baser blir metoden ännu starkare med <b>pH</b>. En syra går över i det organiska skiktet vid lågt pH, där den är oladdad, och tillbaka till vattnet vid högt pH, där den är laddad. Genom att växla pH kan man flytta ämnet fram och tillbaka mellan faserna och lämna orenheter kvar vid varje byte — rening och uppkoncentrering i ett.</p>
       <p>Men metoden har en gräns: är ämnet så polärt eller så laddat att det <i>aldrig</i> föredrar det organiska skiktet finns ingen fördelning att utnyttja. Då binder man i stället ämnet till en <b>adsorptionsresin</b> och eluerar det därifrån.</p>
       <p>För finare separation krävs <b>kromatografi</b>, och metoden väljs efter ämnets egenskaper. Fyra typer räcker långt:</p>
       <ul>
-      <li><b>Normalfas</b> (kiselgel). Stationärfasen är <i>polär</i>, mobilfasen opolär (t.ex. hexan/etylacetat). Polära ämnen binder hårdast och sitter kvar längst — <b>opolära ämnen kommer ut först</b>. Man eluerar genom att göra mobilfasen allt polärare.</li>
-      <li><b>Omvänd fas</b> (C18). Tvärtom: stationärfasen är <i>opolär</i> (C18-kedjor på kiselgel), mobilfasen polär (vatten med metanol eller acetonitril). Opolära ämnen binder hårdast — <b>polära ämnen kommer ut först</b>. Man eluerar genom att öka andelen organiskt lösningsmedel. Det här är arbetshästen och grunden i de flesta HPLC-system.</li>
-      <li><b>Jonbyte</b>. Stationärfasen bär fasta laddningar och binder ämnen med motsatt laddning: en <b>katjonbytare</b> är negativ och binder positiva ämnen, en <b>anjonbytare</b> är positiv och binder negativa. Oladdade ämnen passerar rakt igenom. Man eluerar genom att höja salthalten eller ändra pH så att ämnet tappar sin laddning. Rätt val för aminer, syror och andra laddade ämnen.</li>
-      <li><b>Storleksexklusion</b> (gelfiltration). Kornen är porösa. Små molekyler kommer in i porerna och får en lång väg genom kolonnen; stora molekyler ryms inte och går rakt förbi. Därför kommer <b>stora molekyler ut först</b> och små sist — tvärtemot vad många gissar. Metoden är skonsam och används för peptider och proteiner.</li></ul>
+      <li><b>Normalfas</b> (kiselgel) <span class="eng">normal phase</span>. Stationärfasen är <i>polär</i>, mobilfasen opolär (t.ex. hexan/etylacetat). Polära ämnen binder hårdast och sitter kvar längst — <b>opolära ämnen kommer ut först</b>. Man eluerar genom att göra mobilfasen allt polärare.</li>
+      <li><b>Omvänd fas</b> (C18) <span class="eng">reversed phase</span>. Tvärtom: stationärfasen är <i>opolär</i> (C18-kedjor på kiselgel), mobilfasen polär (vatten med metanol eller acetonitril). Opolära ämnen binder hårdast — <b>polära ämnen kommer ut först</b>. Man eluerar genom att öka andelen organiskt lösningsmedel. Det här är arbetshästen och grunden i de flesta HPLC-system.</li>
+      <li><b>Jonbyte</b> <span class="eng">ion exchange</span>. Stationärfasen bär fasta laddningar och binder ämnen med motsatt laddning: en <b>katjonbytare</b> (<i>cation exchanger</i>) är negativ och binder positiva ämnen, en <b>anjonbytare</b> (<i>anion exchanger</i>) är positiv och binder negativa. Oladdade ämnen passerar rakt igenom. Man eluerar genom att höja salthalten eller ändra pH så att ämnet tappar sin laddning. Rätt val för aminer, syror och andra laddade ämnen.</li>
+      <li><b>Storleksexklusion</b> (gelfiltration) <span class="eng">size exclusion, gel filtration</span>. Kornen är porösa. Små molekyler kommer in i porerna och får en lång väg genom kolonnen; stora molekyler ryms inte och går rakt förbi. Därför kommer <b>stora molekyler ut först</b> och små sist — tvärtemot vad många gissar. Metoden är skonsam och används för peptider och proteiner.</li></ul>
+      <p class="small muted">De engelska namnen står med eftersom nästan all litteratur du möter använder dem — och eftersom "omvänd fas" och "reversed phase" ska kännas som samma sak, inte som två metoder.</p>
       <p>Och det avgörande: <b>bioassay efter varje steg.</b> Det är det som gör fraktioneringen <i>aktivitetsstyrd</i> — aktiviteten pekar ut vilken fraktion du ska gå vidare med. Utan testning har du tjugo rör och ingen aning om vilket som innehåller ämnet.</p>
       <p>Varje runda ger renare material. Till slut återstår ett ämne, och renheten kontrolleras med analytisk HPLC eller TLC.</p>` },
   { key: 'struktur', rubrik: 'Strukturbestämning', kort: 'Vad är det för molekyl?',
@@ -1425,7 +1439,7 @@ const FALL = [
         'Det försökte man, i åratal och med stora resurser. Molekylen har en fyrledad β-laktamring som ingen visste hur man byggde, och flera stereocentrum som måste bli rätt. Totalsyntesen lyckades först 1957 — och är än i dag alldeles för dyr för att användas industriellt. Jäsning vann, och har fortsatt vinna.',
         'Rekombinant teknik fanns inte ens som idé 1941; den kom på 1970-talet. Och den hade inte hjälpt här: penicillin är ingen peptid som en gen kan koda för, utan byggs av en hel rad enzym. Att flytta det maskineriet till jäst är svårt än i dag.',
         'Det kom senare, men inte på det sättet. Själva β-laktamringen <i>måste</i> vara spänd för att verka, så den går inte att stabilisera utan att förstöra effekten. Lösningen blev i stället att byta sidokedja: matar man odlingen med fenoxiättiksyra får man penicillin V, som tål magsyra. Men det låg flera år fram, och löste inte 1941 års problem — som var mängd.'],
-      varfor: 'Jäsningen går att skala upp enormt, och att ämnet förstörs av magsyra löser man genom att injicera i stället. Senare hittades en elegant genväg: matar man odlingen med fenoxiättiksyra i stället för fenylättiksyra byter sidokedjan karaktär, och man får penicillin V — som tål magsyra och kan tas som tablett. Samma svamp, annan råvara i grytan.' }
+      varfor: 'Jäsningen går att skala upp enormt, och att ämnet förstörs av magsyra löser man genom att injicera i stället. (En detalj värd att känna till: Flemings egen mögelsvamp har efter DNA-sekvensering visat sig vara <i>Penicillium rubens</i>. Den industriella tillverkningen bygger inte på hans stam utan på <i>P. chrysogenum</i>, och det är därför den arten står som källa i faktabladet.) Senare hittades en elegant genväg: matar man odlingen med fenoxiättiksyra i stället för fenylättiksyra byter sidokedjan karaktär, och man får penicillin V — som tål magsyra och kan tas som tablett. Samma svamp, annan råvara i grytan.' }
   },
   slutsats: 'Du har just följt upptäckten av <b>bensylpenicillin (penicillin G)</b> ur <i>Penicillium chrysogenum</i>.',
   sub: 'penG'
@@ -1473,7 +1487,7 @@ const FALL = [
         'Tabletten skulle vara bekväm, men ämnet skulle aldrig nå blodet. Molekylvikt 1449, nio OH-grupper och tre fria NH — det är långt bortom allt som passerar tarmväggen. Patienten har en infektion i <i>blodet</i>, och ett läkemedel som stannar i tarmen hjälper då inte alls. (Att ge det som tablett är däremot exakt rätt vid en helt annan sjukdom — se nedan.)',
         'En salva når bara huden, och där sitter inte infektionen. Molekylen är dessutom för stor och för polär för att ta sig genom hornlagret, som släpper igenom ungefär samma sorts molekyler som tarmväggen gör. Vid en infektion i blodet måste läkemedlet in i blodet.',
         'Absorptionsförstärkare finns och används, men de flyttar gränsen med någon tiopotens i bästa fall — de gör inte en molekyl på 1449 Da med laddningar i båda ändar tarmupptagbar. Och när patienten är svårt sjuk behöver du en förutsägbar koncentration i blodet genast, inte ett osäkert upptag. Det är precis därför infusionen aldrig har ersatts.'],
-      varfor: 'För stort och för polärt för att passera tarmväggen — samma egenskap som gjorde extraktionen besvärlig styr alltså också hur läkemedlet måste ges. Eftersom halten i blodet då går att styra exakt, men ämnet samtidigt skadar njurarna i hög dos, mäter man koncentrationen i patientens blod och doserar efter den: vankomycin är ett av de få läkemedel där det görs rutinmässigt. Att de första årens preparat tolererades så illa berodde delvis på något helt annat än molekylen — satserna var bara omkring 70 % rena, och en god del av biverkningarna kom från det som följde med. Och begränsningen har en baksida som är en fördel: <i>som tablett</i> stannar allt kvar i tarmen i hög koncentration, och då botar det tarminfektion med <i>Clostridioides difficile</i>. Samma molekyl, samma egenskap — fel väg för den ena sjukdomen, precis rätt för den andra.' }
+      varfor: 'För stort och för polärt för att passera tarmväggen — samma egenskap som gjorde extraktionen besvärlig styr alltså också hur läkemedlet måste ges. Eftersom halten i blodet då går att styra exakt, men ämnet samtidigt skadar njurarna i hög dos, mäter man koncentrationen i patientens blod och doserar efter den: vankomycin är ett av de få läkemedel där det görs rutinmässigt. Att de första årens preparat tolererades så illa berodde delvis på något helt annat än molekylen — satserna var långt ifrån rena, och en god del av biverkningarna kom från det bruna material som följde med (personalen kallade det "Mississippi mud"). Och begränsningen har en baksida som är en fördel: <i>som tablett</i> stannar allt kvar i tarmen i hög koncentration, och då botar det tarminfektion med <i>Clostridioides difficile</i>. Samma molekyl, samma egenskap — fel väg för den ena sjukdomen, precis rätt för den andra.' }
   },
   slutsats: 'Du har just följt upptäckten av <b>vankomycin</b> ur <i>Amycolatopsis orientalis</i>.',
   sub: 'vankomycin'
@@ -1617,7 +1631,7 @@ const FALL = [
         'Högre dos hjälper mot bakterier som är <i>måttligt</i> okänsliga, men inte mot dem som bär en mutation i själva målstrukturen — för dem binder läkemedlet inte alls, och tio gånger ingenting är fortfarande ingenting. Här är dosökning dessutom särskilt dålig idé: ämnet skadar hörsel- och balansnerven, och den skadan är bestående. Du skulle döva patienten utan att bota infektionen.',
         'Tvärtemot vad som behövs. Tuberkulosbakterien delar sig ungefär en gång om dygnet och går in i vilande tillstånd där inget läkemedel biter; kortare behandling lämnar just de vilande kvar att starta om infektionen, nu med de mest motståndskraftiga bakterierna först. Det är därför behandlingen än i dag pågår i sex månader eller längre, och varför avbruten behandling är en av de viktigaste orsakerna till resistent tuberkulos.',
         'Det är precis vad man gjorde i början, och det misslyckades på ett lärorikt sätt. Byter du när resistensen redan är ett faktum möter nästa läkemedel en infektion som nu nästan enbart består av motståndskraftiga bakterier — och samma sak upprepas, ett läkemedel i taget, tills inga återstår. Läkemedlen måste ges <i>samtidigt</i>, medan de fortfarande kan täcka upp för varandra.'],
-      varfor: 'I en infektion finns miljardtals bakterier, och några bär redan av en slump en mutation som gör dem okänsliga — innan behandlingen ens börjat. Ger du ett enda medel dödar du alla utom dem, och lämnar hela utrymmet åt just dem. Det är naturligt urval i snabbspolning, och förloppet syns tydligt i siffrorna: patienterna blir bättre i några månader och sedan sämre igen. Ger du däremot två eller tre medel med <i>olika</i> angreppspunkter måste en och samma bakterie råka bära mutationer mot alla samtidigt. Är chansen en på miljonen för var och en blir den en på en miljard miljarder för tre, och så många bakterier finns inte i en patient. Det är därför tuberkulos än i dag behandlas med tre till fyra läkemedel samtidigt i många månader. Två andra saker i den här berättelsen är värda att minnas. Biverkningen — bestående hörselnedsättning och yrsel — sitter kvar och beror på att hårcellerna i innerörat är ovanligt känsliga för aminoglykosider; det är en av orsakerna till att streptomycin i dag används sparsamt. Och prövningen som visade att medlet fungerade genomfördes 1948 genom att slumpa patienterna mellan behandling och ingen behandling. Det brukar räknas som den första moderna randomiserade kliniska prövningen — alltså fick världen två saker ur den här historien: ett läkemedel och ett sätt att veta om läkemedel fungerar.' }
+      varfor: 'I en infektion finns miljardtals bakterier, och några bär redan av en slump en mutation som gör dem okänsliga — innan behandlingen ens börjat. Ger du ett enda medel dödar du alla utom dem, och lämnar hela utrymmet åt just dem. Det är naturligt urval i snabbspolning, och förloppet syns tydligt i siffrorna: patienterna blir bättre i några månader och sedan sämre igen. Ger du däremot två eller tre medel med <i>olika</i> angreppspunkter måste en och samma bakterie råka bära mutationer mot alla samtidigt. Är chansen en på miljonen för var och en blir den en på en miljard miljarder för tre, och så många bakterier finns inte i en patient. Det är därför tuberkulos än i dag behandlas med tre till fyra läkemedel samtidigt i många månader. Två andra saker i den här berättelsen är värda att minnas. Biverkningen — bestående hörselnedsättning och yrsel — sitter kvar och beror på att hårcellerna i innerörat är ovanligt känsliga för aminoglykosider; det är en av orsakerna till att streptomycin i dag används sparsamt. Och prövningen som visade att medlet fungerade genomfördes 1948 genom att slumpa patienterna mellan streptomycin och enbart sängläge, som var dåtidens standardbehandling. Det brukar räknas som den första moderna randomiserade kliniska prövningen — alltså fick världen två saker ur den här historien: ett läkemedel och ett sätt att veta om läkemedel fungerar.' }
   },
   slutsats: 'Du har just följt upptäckten av <b>streptomycin</b> ur <i>Streptomyces griseus</i>.',
   sub: 'streptomycin'
@@ -1671,7 +1685,7 @@ const FALL = [
   sub: 'ivermektin'
 },
 {
-  id: 'zikonotid', titel: 'Snäckan som jagar fisk', ar: 1979, plats: 'Ett marinbiologiskt laboratorium på Filippinerna',
+  id: 'zikonotid', titel: 'Snäckan som jagar fisk', ar: 1982, plats: 'Ett universitetslaboratorium i Utah',
   ingress: 'Du växte upp vid Filippinernas kust, där vackra kägelsnäckor ligger i sanden och barn varnas för att plocka upp dem. Nu är du forskare, och du har sett något du inte kan förklara.',
   steg: {
     val: { data: ['Snäckan kryper långsammare än nästan allt annat i havet.', 'Ändå lever den på fisk — och fisken simmar hundra gånger fortare än snäckan.', 'På film syns hur snäckan skjuter ut en harpunliknande tand och träffar fisken. Fisken slutar röra sig nästan omedelbart.', 'Fiskare som stuckit sig på en kägelsnäcka beskriver domningar och i svåra fall andningsförlamning.'],
@@ -1713,7 +1727,7 @@ const FALL = [
         'Barriären är inte en fråga om mängd utan om vad som släpps igenom. Att tiodubbla dosen i blodet ger tio gånger mer peptid på <i>fel</i> sida om barriären, och kanalen den blockerar finns också på nerver ute i kroppen och i hjärtat — du skulle få alla biverkningar och ingen smärtlindring. Just det här ämnet har dessutom ett smalt fönster mellan verksam och besvärande dos.',
         'Nässpray fungerar för små molekyler och för en del peptider som ska ut i blodet, men inte här. En peptid på 25 aminosyror tas upp dåligt genom nässlemhinnan, och den lilla del som kommer in hamnar i blodet — alltså återigen utanför barriären. Vägen förbi barriären via näshålan finns beskriven men är osäker och räcker inte för ett läkemedel som måste doseras exakt.',
         'Två skilda hinder, och enzymhämmaren tar bara det ena. Även en peptid som mirakulöst överlevde tarmen vore för stor och för polär för att passera tarmväggen, och sedan återstår ändå blod–hjärnbarriären. När tre hinder ligger på rad efter varandra lönar det sig inte att lösa ett.'],
-      varfor: 'Två hinder, samma slutsats: peptider blir varken tabletter eller CNS-läkemedel via blodet. Når molekylen inte fram får man i stället placera den på rätt sida om barriären — här med en liten dosa under huden som via en tunn kateter ger ämnet <b>intratekalt</b>, direkt i ryggmärgsvätskan, några mikrogram om dygnet. Det är ett ingrepp som bara försvaras av att patienterna är de som ingenting annat hjälpt. Lägg märke till hur hela berättelsens kedja hänger ihop: att peptiden är polär och laddad styrde extraktionen, styrde valet av kolonn, och styr nu administrationssättet — det är samma egenskap varje gång. Själva läkemedlet tillverkas syntetiskt, aminosyra för aminosyra, och viks därefter ihop till rätt knut; man odlar inga snäckor. Och poängen med alltihop ligger i vad ämnet <i>inte</i> gör: det binder en kalciumkanal som bara sitter på de nervändar som förmedlar smärta, verkar alltså inte alls som morfin, och ger varken tolerans eller beroende. Priset är ett smalt dosfönster och biverkningar från centrala nervsystemet. Från en fiskätande snäcka på ett korallrev till ett godkänt läkemedel tog det tjugofem år.' }
+      varfor: 'Två hinder, samma slutsats: peptider blir varken tabletter eller CNS-läkemedel via blodet. Når molekylen inte fram får man i stället placera den på rätt sida om barriären — här med en liten dosa under huden som via en tunn kateter ger ämnet <b>intratekalt</b>, direkt i ryggmärgsvätskan, några mikrogram om dygnet. Det är ett ingrepp som bara försvaras av att patienterna är de som ingenting annat hjälpt. Lägg märke till hur hela berättelsens kedja hänger ihop: att peptiden är polär och laddad styrde extraktionen, styrde valet av kolonn, och styr nu administrationssättet — det är samma egenskap varje gång. Själva läkemedlet tillverkas syntetiskt, aminosyra för aminosyra, och viks därefter ihop till rätt knut; man odlar inga snäckor. Och poängen med alltihop ligger i vad ämnet <i>inte</i> gör: det binder en kalciumkanal som bara sitter på de nervändar som förmedlar smärta, verkar alltså inte alls som morfin, och ger varken tolerans eller beroende. Priset är ett smalt dosfönster och biverkningar från centrala nervsystemet. Läkemedlet godkändes 2004 — drygt tjugo år efter att peptiden beskrevs, och närmare fyrtio efter att Olivera började intressera sig för kägelsnäckor.' }
   },
   slutsats: 'Du har just följt upptäckten av <b>zikonotid</b>, ur giftet från kägelsnäckan <i>Conus magus</i>.',
   sub: 'zikonotid'
@@ -1777,7 +1791,7 @@ const FALL = [
         'Det stämmer ofta i praktiken, och är ett verkligt skäl att använda enzymtester i stora program. Men billigt är inte det som gör testet <i>rätt</i> här. Ett billigt test som mäter fel sak är värdelöst hur många gånger du än kör det. Det avgörande är att svaret du får — "hämmas det här enzymet?" — är exakt den fråga du vill ha besvarad.',
         'Du slipper det mesta av sterilarbetet, och det är bekvämt. Men bekvämlighet styr inte valet av bioassay. Lägg dessutom märke till att du ändå måste odla svamparna sterilt för att få fram extrakten — det är bara avläsningen som blir enklare.',
         'Kapacitet är en fördel, men inte den avgörande, och den var inte särskilt stor på 1970-talet — testen kördes för hand, rör för rör. Det var tvärtom ett enormt arbete: omkring 6000 odlingar testades innan två av dem gav utslag. Poängen är att varje utslag betydde något bestämt.'],
-      varfor: 'Ett test mot levande celler svarar bara "något hände" — och något händer av tusen olika skäl, varav de flesta bara betyder att extraktet är giftigt. Ett test mot ett <b>renat enzym</b> svarar på en mycket snävare fråga: hämmas just det här steget? Därmed kan du leta riktat efter en bestämd verkningsmekanism i stället för att hoppas på tur, och det är en stor sak — jämför med alla tidigare berättelser i modulen, där man letat efter "något som dödar bakterier" och sedan fått ta reda på hur det verkar i efterhand. Här är ordningen omvänd: mekanismen bestäms först, molekylen söks sedan. Priset är att du bara kan hitta det du redan tänkt på, och att ett ämne som hämmar ett enzym i provrör inte alls behöver fungera i en cell eller i en människa — det kan vara för polärt för att komma in, brytas ner, eller hämma tjugo andra enzym på köpet. Resonemanget som bar upp hela projektet var ekologiskt: svampar behöver själva steroler i sina cellmembran, alltså borde någon svamp ha kommit på att slå ut sterolsyntesen hos sina konkurrenter. Efter omkring 6000 odlingar fanns två aktiva — och den första av dem kom ur en <i>Penicillium</i>-art, samma släkte som gav penicillinet.' },
+      varfor: 'Ett test mot levande celler svarar bara "något hände" — och något händer av tusen olika skäl, varav de flesta bara betyder att extraktet är giftigt. Ett test mot ett <b>renat enzym</b> svarar på en mycket snävare fråga: hämmas just det här steget? Därmed kan du leta riktat efter en bestämd verkningsmekanism i stället för att hoppas på tur, och det är en stor sak — jämför med alla tidigare berättelser i modulen, där man letat efter "något som dödar bakterier" och sedan fått ta reda på hur det verkar i efterhand. Här är ordningen omvänd: mekanismen bestäms först, molekylen söks sedan. Priset är att du bara kan hitta det du redan tänkt på, och att ett ämne som hämmar ett enzym i provrör inte alls behöver fungera i en cell eller i en människa — det kan vara för polärt för att komma in, brytas ner, eller hämma tjugo andra enzym på köpet. Resonemanget som bar upp hela projektet var ekologiskt: svampar behöver själva steroler i sina cellmembran, alltså borde någon svamp ha kommit på att slå ut sterolsyntesen hos sina konkurrenter. Efter omkring 6000 odlingar fanns två aktiva — och den som bar frukt kom ur en <i>Penicillium</i>-art, samma släkte som gav penicillinet.' },
     extraktion: { data: ['Du odlar svampen och extraherar materialet.', 'Ämnet går över i organiskt lösningsmedel vid lågt pH, men stannar i vattnet vid högt.', 'Det beter sig alltså som en syra — men NMR visar ingen fri karboxylsyra.', 'I stället finns en sluten ring med en esterbindning: en <b>lakton</b>.'],
       fraga: 'Hur kan ett ämne utan fri syragrupp ändå bete sig som en syra vid högt pH?',
       val: ['Laktonringen öppnas i basisk lösning till en fri hydroxisyra', 'Mätningen måste vara fel', 'Esterbindningar är alltid sura', 'Ämnet binder hydroxidjoner och blir negativt laddat'], ratt: 0,
@@ -1825,7 +1839,7 @@ const FALL = [
         'Immunhämning är en verkan, inte en giftverkan. Skillnaden är avgörande: ett giftigt ämne skadar celler urskillningslöst, medan det här ämnet griper in i en bestämd signalväg och stänger av en bestämd funktion. Att stänga av immunförsvaret är livsfarligt för den som har en infektion och livräddande för den som just fått ett nytt organ. Det är sammanhanget som avgör, inte molekylen.',
         'Orenhet är alltid värd att misstänka när ett extrakt gör flera saker, och man utesluter den genom att rena vidare och se om effekterna följs åt. Här gjorde de det: samma rena molekyl hämmade både svamp och immunförsvar. Det är inte ovanligt — en molekyl kan binda besläktade proteiner i helt olika organismer.',
         'Tvärtom: effekten var den <i>oplanerade</i>, den som ingen letade efter och som därför var obekväm. Programmets egentliga mätning gällde svamphämning, och den fungerade utmärkt. Immunhämningen upptäcktes som en bieffekt i djurförsök.'],
-      varfor: 'Det här är ciklosporinets historia spegelvänd, och de två är värda att läsa bredvid varandra. Där räddades ett ämne som <i>föll igenom</i> sitt test av att någon testade det i något annat. Här avfärdades ett ämne som <i>klarade</i> sitt test, på grund av en bieffekt — och samma bieffekt blev senare hela dess användning. Lärdomen är densamma åt båda hållen: ett screeningresultat är inte ett omdöme om molekylen, bara ett svar på den fråga som ställdes. När svampmedelsprogrammet lades ner tog en av forskarna med sig prov hem och behöll dem i en frys i över tio år, tills immunhämmande ämnen plötsligt var intressanta igen — och jordprovet som allt började med hade samlats in av en expedition till Påskön innan ön fick flygplats. Att ämnet har med sig öns polynesiska namn, Rapa Nui, in i molekylnamnet är ovanligt: naturproduktsnamn brukar komma från organismen, inte från platsen.' },
+      varfor: 'Det här är ciklosporinets historia spegelvänd, och de två är värda att läsa bredvid varandra. Där räddades ett ämne som <i>föll igenom</i> sitt test av att någon testade det i något annat. Här avfärdades ett ämne som <i>klarade</i> sitt test, på grund av en bieffekt — och samma bieffekt blev senare hela dess användning. Lärdomen är densamma åt båda hållen: ett screeningresultat är inte ett omdöme om molekylen, bara ett svar på den fråga som ställdes. När svampmedelsprogrammet lades ner tog en av forskarna med sig prov hem och behöll dem i frysen i åratal, tills immunhämmande ämnen plötsligt var intressanta igen — och jordprovet som allt började med hade samlats in av en expedition till Påskön innan ön fick flygplats. Att ämnet har med sig öns polynesiska namn, Rapa Nui, in i molekylnamnet är ovanligt: naturproduktsnamn brukar komma från organismen, inte från platsen.' },
     extraktion: { data: ['Du odlar bakterien i fermentor och extraherar odlingen med organiskt lösningsmedel. Aktiviteten följer med.', 'Ämnet påverkas inte av pH — det är oladdat.', 'Men lösningen tappar aktivitet när den står framme i ljus, och snabbare om den värms.', 'Även syre i luften tycks bryta ner ämnet.'],
       fraga: 'Hur arbetar du med ett fettlösligt men instabilt ämne?',
       val: ['Kallt, mörkt och med så lite syre som möjligt — och så fort som möjligt', 'Vid högt pH, som stabiliserar estrar', 'I vatten i stället för organiskt lösningsmedel', 'Genom att värma lösningen så att nedbrytningen går klart direkt'], ratt: 0,
@@ -1857,7 +1871,7 @@ const FALL = [
         'Dosökning löser inte ett ojämnt upptag — den gör variationen större i absoluta tal, vilket är precis fel när marginalen mellan verksam och skadlig dos är liten. Och den löser inte problemet som ställts: att ge ett immunhämmande ämne i hög dos till hela kroppen, för att skydda några centimeter kärlvägg, innebär att patienten blir infektionskänslig för att slippa en förträngning. Nyttan står inte i proportion till priset.',
         'Molekylen är en stor hybridring med ett stort antal stereocentrum, och en totalsyntes vore ett mästarprov utan industriell framtid. Men framför allt: den löser inget av problemen. En syntetisk kopia är samma molekyl, med samma dåliga upptag och samma instabilitet. Syntes är svaret när du vill ha en <i>annan</i> molekyl, inte en likadan.',
         'Rekombinant tillverkning gäller proteiner, som en enda gen kodar för. Det här är en polyketid–peptid-hybrid byggd av ett helt kluster av stora enzym. Och återigen: det är ett svar på frågan "hur tillverkar man ämnet?", medan frågan här är "hur får man ämnet att verka på rätt ställe?".'],
-      varfor: 'Ibland är lösningen varken en ny molekyl eller en kemisk modifiering, utan ett nytt sätt att få ämnet dit det ska. Lägg märke till hur väl molekylens egenskaper passar just den lösningen. Den är <b>fettlöslig</b>, alltså stannar den kvar i kärlväggens celler i stället för att sköljas bort av blodet. Den är <b>potent</b>, alltså räcker några mikrogram. Den hämmar <b>celldelning</b>, vilket är exakt vad som gör att kärlet växer igen. Och att den tas upp dåligt från tarmen spelar ingen roll längre, eftersom den inte ska passera någon tarm. En egenskap som var ett problem i en beredningsform är betydelselös i en annan. Genom att klä ett litet metallnät — en stent — med ämnet får man hög koncentration exakt där kärlet riskerar att växa igen och nästan ingen effekt i resten av kroppen. Det är lokal behandling i ordets mest bokstavliga mening, och det förändrade hur kranskärlssjukdom behandlas. Samma molekyl används också som tablett efter njurtransplantation, och har dessutom blivit ett av de mest studerade ämnena inom åldrandeforskningen, eftersom det protein den hämmar visat sig styra sambandet mellan näringstillgång och livslängd i allt från jäst till möss. Från ett jordprov på en avlägsen ö i Stilla havet, via ett nedlagt projekt och tio år i en frys.' }
+      varfor: 'Ibland är lösningen varken en ny molekyl eller en kemisk modifiering, utan ett nytt sätt att få ämnet dit det ska. Lägg märke till hur väl molekylens egenskaper passar just den lösningen. Den är <b>fettlöslig</b>, alltså stannar den kvar i kärlväggens celler i stället för att sköljas bort av blodet. Den är <b>potent</b>, alltså räcker några mikrogram. Den hämmar <b>celldelning</b>, vilket är exakt vad som gör att kärlet växer igen. Och att den tas upp dåligt från tarmen spelar ingen roll längre, eftersom den inte ska passera någon tarm. En egenskap som var ett problem i en beredningsform är betydelselös i en annan. Genom att klä ett litet metallnät — en stent — med ämnet får man hög koncentration exakt där kärlet riskerar att växa igen och nästan ingen effekt i resten av kroppen. Det är lokal behandling i ordets mest bokstavliga mening, och det förändrade hur kranskärlssjukdom behandlas. Samma molekyl används också som tablett efter njurtransplantation, och har dessutom blivit ett av de mest studerade ämnena inom åldrandeforskningen, eftersom det protein den hämmar visat sig styra sambandet mellan näringstillgång och livslängd i allt från jäst till möss. Från ett jordprov på en avlägsen ö i Stilla havet, via ett nedlagt projekt och åratal i en frys.' }
   },
   slutsats: 'Du har just följt upptäckten av <b>sirolimus (rapamycin)</b> ur <i>Streptomyces hygroscopicus</i>.',
   sub: 'sirolimus'
@@ -1900,7 +1914,7 @@ const FALL = [
         'En peptid med 924 i massa skulle ge åtta eller nio aminosyror vid hydrolys och innehålla lika många kväveatomer. Din molekyl har <i>en enda</i> kväveatom, och den sitter i aminosockret som hänger på ringen. En enda kväveatom utesluter varje form av peptid.',
         'Aminosockret finns där, och det är lätt att fastna för. Men en aminoglykosid består helt och hållet av sockerringar kopplade till varandra — jämför streptomycin, som är tre sådana ringar och ingenting annat. Här är sockret en enda enhet som hänger på en stor kolring. Det är kärnan som bestämmer klassen.',
         'Terpener byggs av isoprenenheter om fem kol. Din kolkedja är byggd av enheter om två kol, vilket är acetatens signatur, och det är just den skillnaden man letar efter när man ska skilja de två biosyntesvägarna åt. Ironiskt nog är molekylens <i>måltavla</i> — ergosterol — däremot en terpen.'],
-      varfor: 'Tre fynd, tre delar av namnet. Enheter om två kol ger <b>polyketid</b>; en stor ring sluten med en esterbindning ger <b>makrolid</b>; de sju konjugerade dubbelbindningarna ger <b>polyen</b>. Alltså en polyenmakrolid, och namnet beskriver molekylen exakt. Men det viktiga är vad geometrin medför. Sju dubbelbindningar i rad kan inte vrida sig: konjugeringen låser den delen av ringen i ett plant, styvt, helt opolärt band. På motsatta sidan av ringen sitter hydroxylgrupperna. Molekylen är därför inte bara "delvis polär" utan har sina två naturer prydligt åtskilda i rummet, som en planka målad vit på ena sidan. Åtta sådana plankor kan ställas i en ring inuti ett cellmembran med fettsidan utåt mot membranets fettsvansar och OH-sidan inåt — och då har man ett rör fodrat med hydroxylgrupper, alltså en vattenkanal rakt genom membranet. Kalium läcker ut och cellen dör. Den här sortens por bildas bara där molekylen kan packa sig rätt, och det går bäst i ett membran som innehåller ergosterol — det är hela grunden för den selektivitet som finns. Lägg märke till att mekanismen följer direkt ur formen: har du en gång förstått varför ämnet inte ville lösa sig i vare sig vatten eller etylacetat, så vet du också varför det dödar svampceller.' },
+      varfor: 'Tre fynd, tre delar av namnet. Enheter om två kol ger <b>polyketid</b>; en stor ring sluten med en esterbindning ger <b>makrolid</b>; de sju konjugerade dubbelbindningarna ger <b>polyen</b>. Alltså en polyenmakrolid, och namnet beskriver molekylen exakt. Men det viktiga är vad geometrin medför. Sju dubbelbindningar i rad kan inte vrida sig: konjugeringen låser den delen av ringen i ett plant, styvt, helt opolärt band. På motsatta sidan av ringen sitter hydroxylgrupperna. Molekylen är därför inte bara "delvis polär" utan har sina två naturer prydligt åtskilda i rummet, som en planka målad vit på ena sidan. Flera sådana plankor kan ställas i en ring inuti ett cellmembran med fettsidan utåt mot membranets fettsvansar och OH-sidan inåt — och då har man ett rör fodrat med hydroxylgrupper, alltså en vattenkanal rakt genom membranet. Kalium läcker ut och cellen dör. Det förutsätter att molekylen kan packa sig rätt, och det går bäst i ett membran som innehåller ergosterol — där ligger den selektivitet som finns. <b>Men bilden har blivit mer komplicerad:</b> nyare arbeten talar för att ämnet framför allt klumpar ihop sig <i>utanför</i> membranet och drar ut ergosterolet ur det, som en svamp som suger upp vatten, och att det snarare än porerna är det som dödar cellen. Båda mekanismerna diskuteras fortfarande. Lägg märke till att mekanismen följer direkt ur formen: har du en gång förstått varför ämnet inte ville lösa sig i vare sig vatten eller etylacetat, så vet du också varför det dödar svampceller.' },
     utveckling: { data: ['Ämnet botar livshotande svampinfektioner — det finns inget alternativ.', 'Men det skadar njurarna, och infusionen ger frossa, feber och illamående. Smeknamnet på kliniken blir ”amphoterrible”.', 'Selektiviteten går inte att förbättra kemiskt: skillnaden mellan ergosterol och kolesterol är liten, och molekylen behöver sin form för att fungera alls.', 'Ämnet går däremot att kapsla in i små fettblåsor, liposomer.'],
       fraga: 'Hur minskar du biverkningarna när molekylen inte går att förbättra?',
       val: ['Ändrar beredningen: kapsla in ämnet i liposomer så att mindre når patientens egna celler', 'Ger en högre dos mer sällan', 'Ger ämnet som tablett i stället', 'Kombinerar med kolesterol för att skydda kroppens celler'], ratt: 0,
@@ -2000,11 +2014,11 @@ const FALL = [
         'Hormonet innehåller de flesta av de vanliga aminosyrorna. Att tro att ett protein skulle bestå av några få, upprepade byggstenar var dock en utbredd föreställning vid den tiden — många tänkte sig proteiner som regelbundna, nästan polymerlika strukturer. Det var just den föreställningen arbetet kom att vederlägga.',
         'Det kristalliserar mycket väl, i närvaro av zink, och det var en av anledningarna till att det gick att få så rent. Kristallisation är dessutom ett hjälpmedel vid analys, inte ett hinder — det är så man visar att man har ett enda rent ämne.'],
       varfor: 'Frederick Sanger valde insulin av praktiska skäl, och det är en lärdom i sig om hur vetenskap faktiskt går till. Det var litet för att vara ett protein — 51 aminosyror där de flesta har hundratals — och det gick att köpa rent, i grammängder, från vilken läkemedelsfirma som helst, just därför att det redan tillverkades som läkemedel. Läkemedelsproduktionen gjorde alltså grundforskningen möjlig, inte tvärtom. Arbetet tog tio år och gick ut på att klyva proteinet med olika enzym och syror till korta bitar, bestämma varje bits ände, och sedan pussla ihop den enda ordning som förklarar alla överlappande bitar — ungefär som att återställa en text ur flera olika sönderrivna kopior. Resultatet var mer omvälvande än bara en sekvens: det visade för första gången att ett protein har en <b>bestämd, exakt och alltid likadan</b> aminosyraordning, inte en ungefärlig sammansättning. Det var en förutsättning för hela tanken att en gen kodar för ett protein, och därmed för den molekylärbiologi som i sista steget av den här berättelsen gör det möjligt att låta en bakterie tillverka hormonet. Sanger fick Nobelpriset 1958 — och senare ett till, för att ha löst motsvarande problem för DNA.' },
-    utveckling: { data: ['Hormonet utvinns ur bukspottkörtlar från slaktade grisar och nötkreatur. Det krävs omkring två ton körtlar för ett kilo.', 'Antalet diabetiker ökar snabbt, och tillgången är beroende av slakterierna.', 'Djurens hormon skiljer sig från människans på någon enstaka aminosyra, vilket kan ge antikroppar hos patienten.', 'I slutet av 1970-talet blir det möjligt att föra in en mänsklig gen i en bakterie och låta den tillverka proteinet.'],
+    utveckling: { data: ['Hormonet utvinns ur bukspottkörtlar från slaktade grisar och nötkreatur. Utbytet är försvinnande litet: ur två ton körtlar får man några hundra gram insulin.', 'Antalet diabetiker ökar snabbt, och tillgången är beroende av slakterierna.', 'Djurens hormon skiljer sig från människans på någon enstaka aminosyra, vilket kan ge antikroppar hos patienten.', 'I slutet av 1970-talet blir det möjligt att föra in en mänsklig gen i en bakterie och låta den tillverka proteinet.'],
       fraga: 'Hur löser du både tillgången och skillnaden mot människans hormon?',
       val: ['Rekombinant tillverkning: för in den mänskliga genen i bakterier eller jäst', 'Semisyntes från grishormonet', 'Helsyntes av proteinet i fabrik', 'Odla fler grisar'], ratt: 0,
       varforFel: [null,
-        'Det gjordes faktiskt — grisinsulin skiljer sig från människans på en enda aminosyra i änden av den längre kedjan, och den gick att byta ut kemiskt. Metoden användes under en tid och löste skillnadsproblemet. Men den löser inte tillgångsproblemet: du behöver fortfarande två ton körtlar per kilo, och du har lagt till ett dyrt kemiskt steg ovanpå det.',
+        'Det gjordes faktiskt — grisinsulin skiljer sig från människans på en enda aminosyra i änden av den längre kedjan, och den gick att byta ut kemiskt. Metoden användes under en tid och löste skillnadsproblemet. Men den löser inte tillgångsproblemet: du behöver fortfarande slakteriernas körtlar i ton, och du har lagt till ett dyrt kemiskt steg ovanpå det.',
         'En kedja på 51 aminosyror går att bygga kemiskt, men till ett helt orimligt pris för ett läkemedel som miljontals människor behöver varje dag. Och svårigheten slutar inte där: de två kedjorna måste dessutom fogas ihop med svavelbryggorna i exakt rätt mönster, och gör man det på måfå blir utbytet försvinnande litet. Jämför exenatid i modulen — en enkel rak kedja, och därför en helt annan sak att syntetisera.',
         'Räkna på det: två ton bukspottkörtlar för ett kilo hormon betyder tiotusentals djur per ton råvara, och antalet diabetiker ökade snabbt. Tillgången var dessutom bunden till köttkonsumtionen — ett läkemedel som miljontals människor är beroende av kunde alltså inte styras av hur mycket kött som såldes. Och hur många grisar man än föder upp kvarstår skillnaden mot människans egen molekyl.'],
       varfor: 'Ett protein på 51 aminosyror går inte att syntetisera billigt, och djurkällan sätter både ett tak för mängden och en kvarstående skillnad mot människans egen molekyl, som hos en del patienter ger antikroppar. <b>Rekombinant tillverkning</b> löser båda problemen på en gång och är möjlig av ett skäl som är värt att hålla fast vid: ett protein är det enda som en gen direkt kodar för. Ingen av de andra molekylerna i den här modulen — ingen polyketid, ingen icke-ribosomal peptid, ingen aminoglykosid — kan tillverkas genom att flytta en enda gen, eftersom de byggs av långa rader samverkande enzym. En peptid eller ett protein är en gen. För in den mänskliga sekvensen i en bakterie eller en jästcell, och cellen gör exakt den molekyl människan själv gör, i obegränsad mängd, utan ett enda djur inblandat. Humaninsulin blev 1982 det <b>första rekombinanta läkemedlet</b> över huvud taget och öppnade vägen för alla proteinläkemedel som kommit sedan dess — tillväxthormon, koagulationsfaktorer, antikroppar, vacciner. Och sedan gick man vidare förbi naturens egen molekyl: genom att ändra någon enstaka aminosyra i sekvensen har man gjort varianter som tas upp snabbare eller långsammare från injektionsstället, så att en diabetiker i dag kan kombinera ett snabbverkande och ett långverkande insulin. Berättelsen börjar alltså i en sönderriven naturprodukt och slutar i molekyler som inte finns i något djur.' }
@@ -2323,7 +2337,7 @@ const FYND = {
   penG: {
     val: 'Mögelsvamp, isolerad i renkultur från en förorenad platta. Utsöndrar ett ämne som diffunderar ut i agarn och dödar stafylokocker.',
     extraktion: 'Ämnet är en <b>syra</b>. Extraherat till etylacetat vid lågt pH och tillbaka till vatten vid högt. Bryts ner av syra — allt arbete kallt och snabbt.',
-    kromatografi: 'Renat med <b>omvänd fas (C18)</b>. En liten molekyl av medelhög polaritet.',
+    kromatografi: 'Renat med <b>upprepad vätske–vätskeextraktion</b> där pH växlas fram och tillbaka (motströmsfördelning). Sista steget frystorkning, eftersom ämnet inte tål värme.',
     struktur: 'C₁₆H₁₈N₂O₄S, 334 g/mol. Tre aminosyror slutna till ringar, varav en spänd fyrledad ring. Bekräftad med röntgen. Byggd av ett NRPS-enzym.',
     utveckling: 'Används som naturprodukt ur storskalig odling. Ges som injektion, eftersom magsyran förstör den.'
   },
@@ -2775,7 +2789,7 @@ function viewGranskning() {
         ${rad('Mekanism, faktatext', s.mek)}
         ${rad('Används vid (svar i quizen)', lista(s.anvKort))}
         ${rad('Biverkningar (svar i quizen)', lista(s.bivKort))}
-        ${rad('Preparat (svar i quizen)', lista(s.preparat))}
+        ${rad('Preparat (visas inte för studenten; frågas inte i quizen)', lista(s.preparat))}
         ${rad('Strukturer (PubChem)', structsOf(s).map(x => x.namn + (x.cid ? ` (CID ${x.cid})` : '')).join(', '))}
         ${rad('Foto av organismen', bildOf(s) ? `${bildOf(s).slakte ? `<span class="gmark">⚠ visar ${bildOf(s).slakte}, en annan art i samma släkte</span><br>` : ''}${bildOf(s).src.startsWith('data:') ? '' : `<span class="gmark">⚠ bilden ligger inte i sidan utan som en fil (<code>${bildOf(s).src}</code>) som ännu inte är nedladdad: tills den finns visas ingen bild. Se <code>bacteria/img/README.txt</code>.</span><br>`}Foto: ${bildOf(s).foto}, ${bildOf(s).licens}, <a href="${bildOf(s).kalla}" target="_blank" rel="noopener">källan på ${bildOf(s).kallaNamn || 'Wikimedia Commons'}</a>` : '<span class="muted">ingen bild</span>')}
         ${rad('Aminosyrasekvens', s.sekvens ? `${pepName(s)}: ${s.sekvens.rester.join('-')}${s.sekvens.amid ? '-NH₂' : ''}${s.sekvens.not ? '<br>' + s.sekvens.not : ''}` : '')}
@@ -2792,6 +2806,7 @@ function viewGranskning() {
   app.innerHTML = `<div class="card granskning-intro">
       <h2>📋 Granskningsunderlag</h2>
       <p>Här står <b>allt som quizen frågar om</b>, substans för substans, hämtat direkt från samma data som frågorna. Rättas något här, rättas frågorna automatiskt.</p>
+      <p class="small muted">Undantag: raden <b>Preparat</b> nedan. Preparatnamnen visas inte längre för studenten och frågas inte i quizen — de ligger kvar här enbart om du vill ta in dem igen. Du behöver alltså inte granska dem.</p>
       <p class="gmark" style="font-size:1rem">⚠ Inget i den här modulen kommer från dina föreläsningar: allt är skrivet av Claude utifrån standardlitteratur (läroböcker i farmakognosi och farmakologi, FASS, PubChem). Läs därför allt. Punkter märkta ”Kontrollera särskilt” är sådant där källor skiljer sig åt eller där jag är mindre säker.</p>
       <p class="small">Felaktiga svarsalternativ i flervalsfrågorna hämtas från de andra substansernas uppgifter, utom i Jämför och skilj, där de står nedan.</p>
       <p class="small">📷 <b>Bilderna</b> visas bara på faktasidorna, aldrig i quizen (studenterna ska alltså inte känna igen organismer på bild). <b>Bara djuren har foton.</b> Svamparna och bakterierna hade inga: de fria bilder som finns är en blandning av elektronmikroskopi och agarplattor i olika stilar, och för flera arter fanns ingen bild alls på just den arten, så samma platta fick gå igen på flera. Det blev mer förvirrande än lärorikt, så de är borttagna.</p>
@@ -3019,11 +3034,11 @@ const TEMAN = {
   blandat: { namn: 'Blandat', typer: [
     ...Array(3).fill(['kalla', 'substansUr', 'grupp', 'mek', 'mekIVal', 'anv', 'anvIVal', 'biv', 'bivIVal', 'skrivKalla']).flat(),
     ...Array(4).fill('skrivAnv'),
-    'klass', 'bioVag', 'framst', 'preparat', 'strukturNamn', 'strukturKalla', 'strukturVal', 'sekvensNamn', 'sekvensKalla', 'kontrast'],
+    'klass', 'bioVag', 'framst', 'strukturNamn', 'strukturKalla', 'strukturVal', 'sekvensNamn', 'sekvensKalla', 'kontrast'],
     skrivkrav: true, latinTyper: ['skrivKalla'] },
   kalla: { namn: 'Källa: organism', typer: ['kalla', 'substansUr', 'grupp', 'skrivKalla'], latinTyper: ['skrivKalla'] },
   mekanism: { namn: 'Verkningsmekanism', typer: ['mek', 'mekIVal'] },
-  anvandning: { namn: 'Användning och preparat', typer: ['anv', 'anvIVal', 'preparat', 'skrivAnv'], skrivkrav: true },
+  anvandning: { namn: 'Användning', typer: ['anv', 'anvIVal', 'skrivAnv'], skrivkrav: true },
   biverkningar: { namn: 'Biverkningar', typer: ['biv', 'bivIVal'] },
   biosyntes: { namn: 'Ämnesklass, biosyntes och framställning', typer: ['klass', 'bioVag', 'framst'] },
   strukturer: { namn: 'Strukturer', typer: ['strukturNamn', 'strukturKalla', 'strukturVal', 'skrivStruktur'] },
@@ -3083,11 +3098,6 @@ const QTYPES = {
     const b = pick(s.bivKort);
     const others = shuffle(uniq(SUBSTANSER.filter(o => !o.bivKort.includes(b) && !sammaFam(o, s)).flatMap(o => o.bivKort).filter(x => !s.bivKort.includes(x)))).slice(0, 3);
     return { q: `Vad ska man se upp med för <b>${s.namn}</b>?`, right: b, info: `${s.namn}: ${s.bivKort.join('; ')}.`, opts: [b, ...others].map(textOpt) };
-  },
-  preparat(s) {
-    if (!(s.preparat || []).length) return null;
-    return { q: `Preparatet <b>${pick(s.preparat)}</b> innehåller vilken substans?`, right: s.id, info: `${s.namn} finns bl.a. i ${s.preparat.join(', ')}.`,
-      opts: [subOpt(s), ...andra(s, 3, o => !sammaFam(o, s)).map(subOpt)] };
   },
   klass(s) {
     const others = shuffle(uniq(SUBSTANSER.map(o => o.klass)).filter(k => k !== s.klass)).slice(0, 3);
@@ -3411,7 +3421,7 @@ function choiceInfo(q, key) {
   if (o) {
     const what = {
       substansUr: `kommer från ${orgHTML(o)}`, mekIVal: `verkar genom: ${o.mekKort}`, anv: `används vid: ${o.anvKort.join('; ')}`,
-      biv: o.bivKort.length ? `förknippas med: ${o.bivKort.join('; ')}` : '', preparat: (o.preparat || []).length ? `finns i ${o.preparat.join(', ')}` : 'inte har något preparat i kursen',
+      biv: o.bivKort.length ? `förknippas med: ${o.bivKort.join('; ')}` : '',
       sekvensNamn: `har ${o.sekvens ? o.sekvens.rester.length : '?'} byggstenar och kommer från ${orgHTML(o)}`,
       sekvensVal: `kommer från ${orgHTML(o)}`
     }[q.typ];
@@ -3607,7 +3617,8 @@ const tidslinjeHTML = (nyckel) => {
     <div class="spar-h"><span class="ico">${sp.ikon}</span><div><b>${sp.namn}</b><span class="spar-kort">${sp.kort}</span></div></div>
     <p class="spar-text">${sp.text}</p>
     <div class="btn-row" style="margin-top:.7rem">
-      <button class="btn btn-main" onclick="startResa('${start.id}')">▶ ${gjorda === fall.length ? 'Gör om spåret' : pabörjat ? 'Fortsätt' : 'Börja här'}: ${start.ar} — ${start.titel}</button>
+      <!-- "Gör om spåret" must restart, not open the review page the way a finished journey otherwise does -->
+      <button class="btn btn-main" onclick="startResa('${start.id}'${gjorda === fall.length ? ', true' : ''})">▶ ${gjorda === fall.length ? 'Gör om spåret' : pabörjat ? 'Fortsätt' : 'Börja här'}: ${start.ar} — ${start.titel}</button>
     </div>
     <p class="small muted" style="margin-top:.6rem">${gjorda} av ${fall.length} gjorda · följ dem uppifrån och ned</p>
     <ol class="tidslinje">${fall.map(f => `<li class="${klara.includes(f.id) ? 'klar' : ''}">
@@ -3637,13 +3648,30 @@ function viewResa() {
       <div class="tidslinjer">${tidslinjeHTML('mikrob')}${tidslinjeHTML('djur')}</div>
     </div>`;
 }
-function startResa(id) {
+/* `omstart` forces a fresh run. Without it, a journey already completed opens on its
+   result page instead, so you can look the whole thing over again without clicking through
+   five stages you have already answered. The ↺ button there starts it over properly. */
+function startResa(id, omstart) {
   // without an id: take the earliest one not yet done, so the chronology holds
   if (!id) {
     const kvar = iAr(FALL.filter(f => !resaKlara().includes(f.id)));
     id = (kvar[0] || iAr(FALL)[0]).id;
   }
+  if (!omstart && resaKlara().includes(id)) return visaKlarResa(id);
   resa = { id, i: 0, vy: 'larom', poang: 0, steg: [] };
+  renderResa();
+}
+/* Rebuild a finished run for review. The journal is written from FYND, not from what was
+   clicked, so filling in the correct answer for every stage reproduces exactly the summary
+   the student saw when they finished — without pretending to remember their actual answers. */
+function visaKlarResa(id) {
+  resa = { id, i: 0, vy: 'fraga', poang: 0, steg: [] };
+  FASER.forEach((fa, i) => {
+    const st = fallOf(id).steg[fa.key];
+    const val = shuffle(st.val.map((t, k) => ({ key: k, html: t })));
+    resa.steg[i] = { val, vald: val.findIndex(o => o.key === st.ratt), visar: null };
+  });
+  resa.i = FASER.length;
   renderResa();
 }
 // move to a stage you have already reached; an answered stage opens on its answer
@@ -3713,31 +3741,50 @@ function renderResa() {
       </div>
     </div>
     <div class="btn-row" id="rbakwrap">${tillbaka}</div></div>`;
+  // the options stay clickable after answering, so the student can read why each of the others
+  // is wrong. `vald` keeps the answer they actually gave; `visar` is only what they are reading.
+  app.querySelectorAll('.opt').forEach((b, k) => b.addEventListener('click', () => svaraResa(k)));
   if (mitt.vald !== null) visaSvar();
-  else app.querySelectorAll('.opt').forEach((b, k) => b.addEventListener('click', () => svaraResa(k)));
   window.scrollTo(0, 0);
 }
 function svaraResa(k) {
-  if (resa.steg[resa.i].vald !== null) return;
-  resa.steg[resa.i].vald = k;
-  visaSvar();
+  const mitt = resa.steg[resa.i], forsta = mitt.vald === null;
+  if (forsta) mitt.vald = k;   // the first click is the answer, and it stands
+  mitt.visar = k;              // every later click only changes which option is explained
+  visaSvar(forsta);
 }
 // draws the answered state; used both when answering and when coming back to a stage
-function visaSvar() {
+function visaSvar(forsta) {
   const fas = FASER[resa.i], st = stegData(), mitt = resa.steg[resa.i];
+  if (mitt.visar === undefined || mitt.visar === null) mitt.visar = mitt.vald;
   const r = st.ratt, ok = mitt.val[mitt.vald].key === r;
+  const utforskar = mitt.visar !== mitt.vald;   // reading about an option they did not pick
+  // The whole feedback box follows the option being READ, not the answer given: reading a
+  // wrong option must look wrong, even for a student who answered correctly.
+  const visadRatt = mitt.val[mitt.visar].key === r;
   app.querySelectorAll('.opt').forEach((b, j) => {
-    b.disabled = true;
-    if (mitt.val[j].key === r) b.classList.add('ok'); else if (j === mitt.vald) b.classList.add('bad');
+    // green = the right answer. Red = any wrong option they have clicked, whether it was their
+    // answer or one they are only looking at — a wrong option must never look neutral.
+    // The ring says which one is being explained below.
+    b.classList.toggle('ok', mitt.val[j].key === r);
+    b.classList.toggle('bad', (j === mitt.vald || j === mitt.visar) && mitt.val[j].key !== r);
+    b.classList.toggle('visas', j === mitt.visar);
   });
   const s0 = byId(uOf().sub);
   const belon = fas.key === 'struktur' && s0 && (structsOf(s0).length || s0.sekvens)
     ? `<div class="belon"><b class="ledtrad-h">Så här ser molekylen ut</b>${structsOf(s0).length ? molDiv(structsOf(s0)[0].id, 'mol-big') : seqHTML(s0, false)}</div>` : '';
-  // why the option the student picked was wrong — often because it did not exist yet
-  const felText = !ok && st.varforFel && st.varforFel[mitt.val[mitt.vald].key];
-  $('#rfb').innerHTML = `<div class="feedback ${ok ? 'ok' : 'bad'}">${ok ? '✅ Just det.' : '❌ Inte riktigt — rätt svar är markerat.'}
-    ${felText ? `<div class="more"><b>Du valde:</b> ${st.val[mitt.val[mitt.vald].key]}<br>${felText}</div>` : ''}
-    <div class="more">${felText ? '<b>Rätt svar:</b> ' : ''}${st.varfor}</div></div>${belon}
+  // why an option is wrong — often because it did not exist yet. `visar` decides which one.
+  const visadKey = mitt.val[mitt.visar].key;
+  const felText = visadKey !== r && st.varforFel && st.varforFel[visadKey];
+  // the banner describes what is on screen: their own verdict when reading their own answer,
+  // otherwise whether the option they are now reading about is the right one
+  const rubrik = !utforskar
+    ? (ok ? '✅ Just det.' : '❌ Inte riktigt — rätt svar är markerat.')
+    : (visadRatt ? '✅ Det här var rätt svar.' : '❌ Det här alternativet är fel.');
+  $('#rfb').innerHTML = `<div class="feedback ${visadRatt ? 'ok' : 'bad'}">${rubrik}
+    ${felText ? `<div class="more"><b>${utforskar ? 'Du tittar på' : 'Du valde'}:</b> ${st.val[visadKey]}<br>${felText}</div>` : ''}
+    <div class="more">${felText ? '<b>Rätt svar:</b> ' : ''}${st.varfor}</div>
+    <p class="utforska-tips">👆 Tryck på de andra alternativen för att läsa varför de är fel. Ditt svar står kvar.</p></div>${belon}
     <div class="btn-row"><button class="btn btn-bak" onclick="bakat()">← Tillbaka</button>
       <button class="btn btn-main" id="rnext">${resa.i + 1 < FASER.length ? 'Nästa steg ➜' : 'Se vad du hittade ➜'}</button></div>`;
   const bakwrap = $('#rbakwrap');          // the lone back button is replaced by the row below
@@ -3747,22 +3794,25 @@ function visaSvar() {
   const logg = app.querySelector('.resa-logg');
   if (logg) logg.innerHTML = loggHTML();
   $('#rnext').addEventListener('click', () => { resa.i++; resa.vy = svarat(resa.i) ? 'fraga' : 'larom'; renderResa(); });
-  $('#rnext').focus({ preventScroll: true });
-  $('#rnext').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  // only move the page on the first answer — while exploring the other options the reader is
+  // already looking at the feedback, and scrolling under them each click is disorienting
+  if (forsta) { $('#rnext').focus({ preventScroll: true }); $('#rnext').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
 }
 function resaKlar() {
   const f = uOf(), s = byId(f.sub), h = HISTORIA[f.id] || {};
   const klara = resaKlara();
-  if (!klara.includes(resa.id)) { klara.push(resa.id); store.set('resor', klara); }
+  const repris = klara.includes(resa.id);   // already finished before: this is a review, not a finish
+  if (!repris) { klara.push(resa.id); store.set('resor', klara); }
   const bild = s && structsOf(s).length ? molDiv(structsOf(s)[0].id, 'mol-big') : s && s.sekvens ? seqHTML(s, false) : '';
   /* The reveal reads top to bottom: what it was → the molecule beside what became of it →
      the whole journey summed up across the full width. The structure is kept to a column of
      its own width so it cannot tower over the text beside it. */
   app.innerHTML = `<div class="card wide slutsida">
     <div class="slut-topp">
-      <span class="slut-emoji">🎉</span>
-      <p class="muted">Du har följt hela vägen, från observation till läkemedel.</p>
+      <span class="slut-emoji">${repris ? '📖' : '🎉'}</span>
+      <p class="muted">${repris ? 'Du har gått den här resan tidigare. Här är sammanfattningen.' : 'Du har följt hela vägen, från observation till läkemedel.'}</p>
       <h2>${f.slutsats}</h2>
+      ${repris ? `<p class="small muted">Du kan bläddra tillbaka genom stegen med knapparna nedan, eller göra om resan från början.</p>` : ''}
     </div>
     ${observationHTML(false)}
     <div class="slut-split">
@@ -3783,10 +3833,12 @@ function resaKlar() {
       // When the track runs out we say so and send them back to choose — never hop tracks on our own.
       const sp = sparFor(f), spar = SPAR[sp];
       const nasta = iAr(FALL.filter(x => sparFor(x) === sp && x.ar > f.ar))[0];
+      const gorOm = `<button class="btn" onclick="startResa('${f.id}', true)">↺ Gör om resan</button>`;
       return nasta
         ? `<div class="btn-row">
             <button class="btn btn-bak" onclick="resa.i=FASER.length-1;resa.vy='fraga';renderResa()">← Tillbaka</button>
             <button class="btn btn-main" onclick="startResa('${nasta.id}')">▶ Nästa i spåret: ${nasta.ar} — ${nasta.titel}</button>
+            ${gorOm}
             <button class="btn" onclick="viewResa()">Byt spår</button>
           </div>
           <p class="small muted" style="margin-top:.6rem">${spar.ikon} Nästa upptäckt i spåret bygger vidare på den du just följt.</p>`
@@ -3795,6 +3847,7 @@ function resaKlar() {
            <div class="btn-row">
             <button class="btn btn-bak" onclick="resa.i=FASER.length-1;resa.vy='fraga';renderResa()">← Tillbaka</button>
             <button class="btn btn-main" onclick="viewResa()">▶ Välj spår</button>
+            ${gorOm}
           </div>`; })()}
     </div>`;
   window.scrollTo(0, 0);
