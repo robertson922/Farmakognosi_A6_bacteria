@@ -471,7 +471,21 @@ ul.begrepp li { margin: .1rem 0; }
   .fakta-split { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 1.5rem; align-items: start; }
   .fakta-side { position: sticky; top: 5.5rem; max-height: calc(100vh - 7rem); overflow-y: auto; padding: .8rem; }
   .fakta-detail { padding: 1.5rem 1.75rem; }
-  .detail-top { display: grid; grid-template-columns: minmax(320px, 5fr) minmax(0, 7fr); gap: 2rem; align-items: start; }
+  /* Organism photo with the structures directly beneath it in one left-hand column, running
+     text to the right. Two plain grid children, so there are no rows for the text to stretch. */
+  .detail-top { display: grid; grid-template-columns: minmax(320px, 5fr) minmax(0, 7fr);
+    gap: 2rem; align-items: start; }
+  .detail-top .detail-structs { margin-top: 1rem; }
+  /* in this column the structures sit one per row, which is what you want when comparing two
+     near-identical molecules — drawn alike, the difference lines up vertically */
+  .detail-top .detail-structs .mol-grid { grid-template-columns: minmax(0, 1fr); }
+  .detail-top .detail-structs .mol-grid > .molruta:only-child { max-width: none; }
+  /* sections that did not fit beside the left column, continued underneath at full width */
+  .detail-under { margin-top: 0; }
+  .detail-under > .frow:first-child dt { margin-top: 0; }
+  /* near relatives: their own block at the foot, structure beside the text with room to be read */
+  .detail-slakt { margin-top: 1.4rem; }
+  .detail-slakt .variant { grid-template-columns: 300px minmax(0, 1fr); gap: 1.6rem; align-items: start; }
   .detail-top .facts > .frow:first-child dt { margin-top: 0; }
   .detail-top .photo { height: 420px; max-height: none; object-fit: contain; }   /* fixed height: the page doesn't jump between substances */
   /* structures float to the right and the running text wraps around them */
@@ -2850,7 +2864,12 @@ document.addEventListener('click', e => {
 });
 // `stor` reaches the markup so that CSS can tell a sprawling molecule from a small one:
 // a lone small structure must not be stretched across the whole page.
-const molGridHTML = s => structsOf(s).length ? `<div class="mol-grid">${structsOf(s).map(x => `<div class="molruta${x.stor ? ' stor' : ''}">${molDiv(x.id)}<div class="mol-cap">${x.namn}${x.not ? `<span class="bio">${x.not}</span>` : ''}</div></div>`).join('')}</div>` : '';
+// Variants are left out here: a near relative gets its structure in its own block further down,
+// and drawing it twice on the same sheet only made the page longer.
+const molGridHTML = s => {
+  const lista = structsOf(s).filter(x => !x.variant);
+  return lista.length ? `<div class="mol-grid">${lista.map(x => `<div class="molruta${x.stor ? ' stor' : ''}">${molDiv(x.id)}<div class="mol-cap">${x.namn}${x.not ? `<span class="bio">${x.not}</span>` : ''}</div></div>`).join('')}</div>` : '';
+};
 
 /* ---------- peptides: amino-acid beads ---------- */
 const AA_NAMN = { A: 'alanin', R: 'arginin', N: 'asparagin', D: 'asparaginsyra', C: 'cystein', E: 'glutaminsyra', Q: 'glutamin', G: 'glycin', H: 'histidin', I: 'isoleucin',
@@ -2992,21 +3011,68 @@ function masteHTML(s) {
 }
 // desktop: photo of the organism on the left, facts on the right, then structures across the full width.
 // Phones get the same blocks stacked.
-const TEXT_RADER = ['kallaText', 'klassText', 'framstText', 'mek', 'anv', 'biv', 'extra', 'varianter'];
+// `varianter` is deliberately NOT here: on a wide screen the near relatives get their own
+// full-width block at the foot of the sheet, with room for the structure beside the text.
+const TEXT_RADER = ['kallaText', 'klassText', 'framstText', 'mek', 'anv', 'biv', 'extra'];
 const detailHTML = s => {
   const foto = photoHTML(s), bild = structsOf(s).length || s.sekvens;
-  if (foto) return masteHTML(s) + `<div class="detail-top"><div class="detail-photo">${foto}</div><div>${factsHTML(s, TEXT_RADER)}</div></div>` +
-    (bild ? `<div class="detail-structs">${factsHTML(s, ['sekvens', 'strukturer'])}</div>` : '');
+  // Photo and structures share ONE left-hand column, as a single grid child. Giving them a row
+  // each instead left a gap: the running text spans whatever rows exist, and grid hands a
+  // spanning item's extra height to any row with an intrinsic size — max-content included — so
+  // the photo's row stretched. One column, two blocks, no rows to stretch.
+  // near relatives, as a full-width block at the foot of the sheet
+  const slakt = (s.varianter || []).length ? `<div class="detail-slakt">${factsHTML(s, ['varianter'])}</div>` : '';
+  if (foto) return masteHTML(s) + `<div class="detail-top">
+      <div class="detail-vanster"><div class="detail-photo">${foto}</div>${bild ? `<div class="detail-structs">${factsHTML(s, ['sekvens', 'strukturer'])}</div>` : ''}</div>
+      <div class="detail-text">${factsHTML(s, TEXT_RADER)}</div></div>` + slakt;
   // no photo: the structures float to the side on a wide screen and the text wraps around them
   if (bild) return masteHTML(s) + `<div class="detail-flyt">
        <div class="detail-structs">${factsHTML(s, ['sekvens', 'strukturer'])}</div>
-       ${factsHTML(s, TEXT_RADER)}</div>`;
+       ${factsHTML(s, TEXT_RADER)}</div>` + slakt;
   return masteHTML(s) + factsHTML(s);
 };
+/* On a wide screen the left-hand column (organism photo, then structures) is often shorter than
+   the running text beside it, which used to leave the page empty below it. The text continues
+   underneath instead — but a section is never split across that boundary: a whole section either
+   fits beside the column or moves below it and runs the full width. Measuring is the only way to
+   know, so this runs after the sheet is in the DOM, and again on resize. */
+function omflytText(root) {
+  if (!root) return;
+  const topp = root.querySelector('.detail-top');
+  if (!topp) return;
+  const dl = topp.querySelector('.detail-text .facts');
+  const vanster = topp.querySelector('.detail-vanster');
+  if (!dl || !vanster) return;
+  // put anything moved last time back, so every run starts from the same state
+  const gammal = root.querySelector('.detail-under');
+  if (gammal) { while (gammal.firstChild) dl.appendChild(gammal.firstChild); gammal.remove(); }
+  if (getComputedStyle(topp).display !== 'grid') return;   // narrow screen: one column already
+  const slut = vanster.getBoundingClientRect().bottom;
+  const rader = [...dl.children];
+  // always leave the first section beside the photo, however tall it is
+  const i = rader.findIndex((r, k) => k > 0 && r.getBoundingClientRect().bottom > slut);
+  if (i < 1) return;
+  const ny = document.createElement('dl');
+  ny.className = 'facts detail-under';
+  rader.slice(i).forEach(r => ny.appendChild(r));
+  topp.after(ny);
+}
+/* The column heights change with the window, so the split has to be worked out again — but the
+   listener is registered once, not every time the Fakta view re-renders. */
+let omflytBunden = false, omflytTimer;
+function omflytPaResize() {
+  if (omflytBunden) return;
+  omflytBunden = true;
+  addEventListener('resize', () => {
+    clearTimeout(omflytTimer);
+    omflytTimer = setTimeout(() => { omflytText($('#fdetail')); omflytText($('#modal-body')); }, 150);
+  });
+}
 const titleHTML = (s, size = '') => `<div class="plant-title" style="margin:.2rem 0 .8rem;${size}">${s.namn}<span class="sv">ur ${orgHTML(s)} · ${GRUPP[s.grupp].ikon} ${GRUPP[s.grupp].namn}</span></div>`;
 function openSub(id) {
   const s = byId(id); if (!s) return;
   $('#modal-body').innerHTML = titleHTML(s) + detailHTML(s);
+  omflytText($('#modal-body'));
   openModal();
 }
 /* Overview page: how microbes and animals build these molecules, and how to read the bead pictures */
@@ -3247,7 +3313,9 @@ function viewFakta() {
       $('#fdetail').innerHTML = id === 'oversikt'
         ? `<div class="plant-title" style="font-size:1.6rem;margin-bottom:1rem">🧬 Översikt<span class="sv">Hur mikrober och djur bygger läkemedelsmolekyler</span></div>${oversiktHTML()}`
         : titleHTML(byId(id), 'font-size:1.6rem;margin-bottom:1rem') + detailHTML(byId(id));
+      omflytText($('#fdetail'));
     };
+    omflytPaResize();
     $('#flist').addEventListener('click', e => { const b = e.target.closest('.fakta-item'); if (b) { show(b.dataset.id); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
     show(faktaSel);
     $('#fsok').addEventListener('input', e => {
