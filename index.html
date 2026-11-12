@@ -189,6 +189,22 @@ details.plant .body { padding: 0 1rem 1rem; }
 .variant-kort { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--acc); font-weight: 700; margin-bottom: .2rem; }
 .variant-text p { margin: .3rem 0 0; }
 @media (max-width: 560px) { .variant { grid-template-columns: 1fr; } .variant-bild { max-width: 200px; } }
+/* "start here" box, on the start page and in the greeting */
+.borja-har { border: 2px solid var(--acc); background: var(--acc-bg); border-radius: .9rem; padding: .9rem 1.1rem; margin: 1rem 0; }
+.borja-har > b { display: block; font-size: 1.1rem; color: #fff; margin-bottom: .3rem; }
+.borja-har p { margin: 0 0 .8rem; }
+.borja-har .btn-row { margin: 0; }
+.tile-forst { border-color: var(--acc); }
+.tile-mark { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; background: var(--acc); color: #06281c;
+  border-radius: 9999px; padding: .1rem .5rem; margin-left: .4rem; vertical-align: .1rem; font-weight: 700; }
+.valkommen dl.facts { margin: .4rem 0 1rem; }
+/* Översikt: the "why microbes / why animals" boxes that head each column */
+.oversikt-rutnat { display: grid; gap: 1rem; }
+.ov-box { border: 1px solid var(--acc); background: var(--acc-bg); border-radius: .9rem; padding: .9rem 1.1rem; }
+.ov-box h3 { margin: 0 0 .4rem; font-size: 1.15rem; color: #fff; }
+.ov-box p { margin: 0; }
+.ov-klasser .facts { margin-top: 0; }
+.ov-bred { border-top: 1px solid var(--panel2); padding-top: .6rem; }
 .eng { font-size: .85em; color: var(--acc-hi); white-space: nowrap; }
 .eng::before { content: '· '; color: var(--muted); }
 .feedback { margin-top: .9rem; padding: .8rem 1rem; border-radius: .9rem; font-weight: 700; }
@@ -458,8 +474,15 @@ ul.begrepp li { margin: .1rem 0; }
   /* structures float to the right and the running text wraps around them */
   .detail-flyt::after { content: ''; display: block; clear: both; }
   .detail-flyt .detail-structs { float: right; width: 44%; margin: 0 0 1.2rem 2rem; }
-  .detail-flyt .detail-structs .mol-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
-  .detail-structs .mol-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .9rem; }
+  /* auto-FIT, not auto-fill: with only one structure, auto-fill keeps the empty tracks and the
+     lone molecule is drawn small beside a gap. auto-fit collapses them so it fills the column. */
+  .detail-flyt .detail-structs .mol-grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+  .detail-structs .mol-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .9rem; }
+  /* and give a single structure more of the page, since nothing is competing for it */
+  .detail-flyt:has(.detail-structs .mol-grid > *:only-child) .detail-structs { width: 52%; }
+  /* ...but in the photo layout the block is full width, and a small molecule drawn 800 px
+     wide looks like a poster. Large molecules still get all the room they need. */
+  .detail-structs .mol-grid > .molruta:not(.stor):only-child { max-width: 440px; }
   .modal .sheet { max-width: 1240px; padding: 1.5rem 1.75rem 2rem; }
   main[data-view="quiz"] > .card, main[data-view="kort"] > .card, main[data-view="para"] > *, main[data-view="resa"] > .card { max-width: 1200px; margin-left: auto; margin-right: auto; }
   /* the run: the evidence on the left, the decision on the right, the journal under it */
@@ -491,8 +514,12 @@ ul.begrepp li { margin: .1rem 0; }
   .mol-q #qfb { grid-area: fb; }
   .mol-q #qfb .feedback { margin-top: 0; }
   .flash { min-height: 0; }
-  .facts.oversikt { column-count: 2; column-gap: 2.5rem; }
-  .facts.oversikt .frow { break-inside: avoid; }
+  /* the two tracks side by side, each with its own classes beneath; Framställning spans both */
+  .oversikt-rutnat { display: grid; grid-template-columns: 1fr 1fr; gap: 0 2.5rem;
+    grid-template-areas: "mikrobbox djurbox" "mikrobklass djurklass" "bred bred"; align-items: start; }
+  .ov-mikrob { grid-area: mikrobbox; } .ov-djur { grid-area: djurbox; }
+  .ov-mikrob-klasser { grid-area: mikrobklass; } .ov-djur-klasser { grid-area: djurklass; }
+  .ov-bred { grid-area: bred; }
 }
 /* ---------- the reveal page at the end of a run ---------- */
 .slutsida .slut-topp { text-align: center; padding: .4rem 0 1.2rem; }
@@ -677,8 +704,8 @@ const SUBSTANSER = [
   id: 'lovastatin', namn: 'lovastatin', grupp: 'svamp',
   latin: 'Aspergillus terreus', latinAlt: [], sv: 'mögelsvamp',
   kallaText: 'Samma ämne (kallat monakolin K) finns i rött jästris, ris som fermenterats med svampen <i>Monascus purpureus</i>.',
-  fam: 'statin', klass: 'statin (polyketid med laktonring)', bio: 'PKSit', vagar: ['ACET'],
-  bioNot: 'Två iterativa polyketidsyntaser: det ena bygger huvudkedjan av nio acetatenheter, som veckas till ett dubbelt ringsystem (dekalin); det andra bygger den korta sidokedjan (2-metylbutyrat).',
+  fam: 'statin', klass: 'statin (polyketid med laktonring)', bio: 'PKS1', vagar: ['ACET'],
+  bioNot: 'Två polyketidsyntaser av typ I, och svampens variant är <b>iterativ</b> — samma modul-set används om och om igen i stället för en modul per förlängning. Det ena enzymet bygger huvudkedjan av nio acetatenheter, som veckas till ett dubbelt ringsystem (dekalin); det andra bygger den korta sidokedjan (2-metylbutyrat).',
   framst: 'naturlig', framstText: '',
   mg: 'hmgcoa', mekKort: 'hämmar HMG-CoA-reduktas → levern bildar mindre kolesterol',
   mek: 'Lovastatin är en prodrug: laktonringen öppnas i kroppen till en hydroxisyra som liknar HMG-CoA. Den hämmar HMG-CoA-reduktas, det hastighetsbegränsande steget i MVA-vägen (kolesterolsyntesen). Levern tar då upp mer LDL-kolesterol ur blodet.',
@@ -720,7 +747,9 @@ const SUBSTANSER = [
   kontraster: [{ q: 'Mjöldryga (<i>Claviceps purpurea</i>): vilket påstående stämmer?',
     svar: ['Svampen angriper råg; ergotamin har använts mot migrän och ergometrin mot blödning efter förlossning', 'Svampen angriper potatis; ergotamin används mot blödning efter förlossning', 'Ergotamin och ergometrin är β-laktamer', 'Mjöldryga är en bakterie som bildar statiner'] }],
   nycklar: [{ etikett: 'migrän', ord: ['migrän', 'huvudvärk'] }],
-  kolla: ['Inga preparat angivna: jag är osäker på om något ergotaminpreparat (t.ex. Anervan) fortfarande finns i Sverige. Kontrollera i FASS.', '”Bara historisk” eller ”fortfarande i bruk”: formulera som du vill.']
+  kolla: ['Inga preparat angivna: jag är osäker på om något ergotaminpreparat (t.ex. Anervan) fortfarande finns i Sverige. Kontrollera i FASS.', '”Bara historisk” eller ”fortfarande i bruk”: formulera som du vill.',
+    '<b>Årtalet 1918</b> för Stolls isolering av ergotamin är det som Sandoz/Novartis själva anger och det vanligaste i litteraturen — men Stoll skriver i sin egen översikt från 1960 att det var <b>1920</b>. Upptäcktsresan är daterad 1918. Säg till om du hellre vill ha 1920, eller att båda nämns.',
+    'Jag har tonat ned påståendet att epimeriseringen (ergotamin ⇄ ergotaminin) förklarar att gamla beredningar tappade styrka: epimererna finns och basiskt pH driver jämvikten, men analytiska studier beskriver ergotamin som förhållandevis stabilt mot värme och ljus.']
 },
 /*SVAMPAR-SLUT*/
 /* ---------- BAKTERIER ---------- */
@@ -889,6 +918,10 @@ const SUBSTANSER = [
   biv: 'Torrhosta hos upp till var tionde patient, orsakad av bradykinin som inte bryts ner. Angioödem (svullnad i ansikte och svalg) är sällsynt men farligt. Förhöjt kalium och njurpåverkan. Fosterskadande: får inte användas under graviditet.',
   preparat: ['Capoten'],
   extra: 'Captopril var det första läkemedlet som togs fram genom att rita en molekyl utifrån ett enzyms aktiva säte (rationell läkemedelsdesign) — en metod som sedan blivit standard.',
+  // Captopril is the one case where the drug itself is a small synthetic molecule, so the
+  // structure is worth drawing: the thiol, the methyl group and the proline ring are exactly
+  // what the text about rational design refers to.
+  strukt: [{ id: 'captopril', namn: 'captopril', cid: 44093, smiles: 'C[C@H](CS)C(=O)N1CCC[C@H]1C(=O)O' }],
   sekvens: { namn: 'teprotid (peptidförebilden ur ormgiftet)',
     rester: ['Pyr','W','P','R','P','Q','I','P','P'],
     forkl: { Pyr: 'pyroglutamat: en ringsluten glutaminsyra i peptidens början' },
@@ -932,8 +965,9 @@ const VAGNAMN = { ISO: 'MVA-/MEP-vägen (isopentenyldifosfatvägen)', SHIK: 'Shi
 /* How the organism builds the molecule */
 const BIONAMN = {
   NRPS: 'Icke-ribosomal peptid (NRPS)',
-  PKS1: 'Polyketid, modulär PKS typ I',
-  PKSit: 'Polyketid, iterativ PKS typ I (svamp)',
+  // Bacteria run their type I modules once each, fungi reuse one set over and over. That is a
+  // detail of the same machine, not a separate class, so it lives in each substance's bioNot.
+  PKS1: 'Polyketid, PKS typ I',
   PKS2: 'Polyketid, PKS typ II (aromatisk)',
   HYB: 'Hybrid polyketid + peptid (PKS + NRPS)',
   AMG: 'Aminoglykosid (byggs av socker)',
@@ -1206,7 +1240,7 @@ const FALL = [
         'Omvänd fas vore i dag självklart för just det här problemet — närbesläktade ämnen med nästan samma storlek och laddning skiljs utmärkt efter polaritet. Men C18-kolonner och HPLC kom på 1970-talet, ett halvsekel senare. <b>I dag</b> renas ergotalkaloider rutinmässigt så, och epimererna syns då som två toppar.',
         'Gelfiltration skiljer på storlek, och de här alkaloiderna är inte bara lika stora — epimererna har <i>exakt</i> samma summaformel och massa. De skiljer sig bara i hur atomerna sitter i rymden. Ingen metod som bygger på storlek kan se den skillnaden. (Sephadex kom dessutom först 1959.)',
         'Destillation kräver att ämnet kan förångas utan att förstöras. En ergotalkaloid är en stor, värmekänslig molekyl som bryts ner långt innan den kokar — även under vakuum. Destillation fungerar för flyktiga ämnen som terpener och eteriska oljor, inte för alkaloider av den här storleken.'],
-      varfor: 'Innan kromatografin var <b>fraktionerad kristallisation</b> det skarpaste verktyg kemisten hade, och för alkaloider är den särskilt användbar: en bas bildar salt med en syra, och olika alkaloiders salter har olika löslighet. Man löser blandningen, låter den svalna, och det som är minst lösligt faller ut först. Löser man om det och gör samma sak igen blir det renare för varje runda. Tålamod i stället för utrustning. Det riktigt svåra här är inte de olika alkaloiderna utan <b>epimererna</b>. Varje ergotalkaloid finns i två former som skiljer sig i rymden vid ett enda kol intill amiden, och de övergår i varandra i lösning: den verksamma ergotamin och den nästan overksamma ergotaminin. De har samma massa, samma formel och nästan samma kemi, men bara den ena verkar. Det är därför en gammal ergotberedning kunde vara stark när den gjordes och svag ett år senare — utan att något "brutits ner" i vanlig mening. Arthur Stoll lyckades 1918 få fram ergotamin i ren, kristallin form, och det var <b>den första rena ergotalkaloiden över huvud taget</b>. Först då gick medlet att dosera i milligram i stället för i skedar.' },
+      varfor: 'Innan kromatografin var <b>fraktionerad kristallisation</b> det skarpaste verktyg kemisten hade, och för alkaloider är den särskilt användbar: en bas bildar salt med en syra, och olika alkaloiders salter har olika löslighet. Man löser blandningen, låter den svalna, och det som är minst lösligt faller ut först. Löser man om det och gör samma sak igen blir det renare för varje runda. Tålamod i stället för utrustning. Det riktigt svåra här är inte de olika alkaloiderna utan <b>epimererna</b>. Varje ergotalkaloid finns i två former som skiljer sig i rymden vid ett enda kol intill amiden, och de övergår i varandra i lösning: den verksamma ergotamin och den nästan overksamma ergotaminin. De har samma massa, samma formel och nästan samma kemi, men bara den ena verkar. Det betyder att du kan ha ett "rent" ämne som ändå är en blandning av verksamt och overksamt, och att basiska betingelser driver jämvikten åt fel håll — ytterligare ett skäl att hålla pH i schack. Arthur Stoll lyckades 1918 få fram ergotamin i ren, kristallin form, och det var <b>den första rena ergotalkaloiden över huvud taget</b>. Först då gick medlet att dosera i milligram i stället för i skedar.' },
     struktur: { data: ['Molekylvikt 581. Molekylen innehåller fyra kväveatomer.', 'Hydrolys i bas bryter isär den i två delar.', 'Den ena delen är en syra med ett fyrringat system som bär ett indol — den visar sig vara gemensam för <b>alla</b> ergotalkaloider ni renat fram.', 'Den andra delen består av tre aminosyror, hopvikta och slutna till ett ringsystem.'],
       fraga: 'Vad betyder det att samma syra faller ut ur alla alkaloiderna i familjen?',
       val: ['Att de delar en gemensam kärna, och att det är det påhängda som skiljer dem åt', 'Att alla prover var förorenade med samma ämne', 'Att alkaloiderna är identiska och skillnaderna var mätfel', 'Att svampen bildar alkaloiderna av varandra i tur och ordning'], ratt: 0,
@@ -2273,7 +2307,7 @@ const ARV = {
 /* What really happened — shown as the reward at the end, never asked as a question. */
 const HISTORIA = {
   ergotamin: {
-    efterat: 'Arthur Stoll renade fram ergotamin 1918 — den första rena ergotalkaloiden. Lysergsyra identifierades som den gemensamma kärnan på 1930-talet, och ergometrin isolerades 1935 av fyra grupper oberoende av varandra. Ur samma kärna växte sedan en hel läkemedelsfamilj fram: metylergometrin mot postpartumblödning, dihydroergotamin mot migrän och bromokriptin mot förhöjt prolaktin och Parkinson. Vid samma företag framställde Albert Hofmann 1938 även LSD ur lysergsyra.'
+    efterat: 'Arthur Stoll renade fram ergotamin 1918 — den första rena ergotalkaloiden. Lysergsyra identifierades som den gemensamma kärnan på 1930-talet, och ergometrin isolerades 1935. Ur samma kärna växte sedan en hel läkemedelsfamilj fram: metylergometrin mot postpartumblödning, dihydroergotamin mot migrän och bromokriptin mot förhöjt prolaktin och Parkinson. Vid samma företag framställde Albert Hofmann 1938 även LSD ur lysergsyra.'
   },
   penG: { vem: 'Alexander Fleming', efterat: 'Fleming publicerade fyndet 1929 men fick aldrig ämnet rent och övergav spåret. Först 1940 löste Florey och Chain i Oxford reningen och visade effekten på möss; massproduktionen kom igång under andra världskriget. De tre delade Nobelpriset 1945.', kolla: ['Den klassiska versionen av Flemings upptäckt är förenklad i de flesta läroböcker.'] },
   vankomycin: { vem: 'Edmund Kornfeld på Eli Lilly', efterat: 'Jordprovet skickades hem av en missionär från Borneo. Namnet kommer av engelskans ”to vanquish”, att besegra. Ämnet blev reservmedlet mot MRSA, och det dröjde omkring trettio år innan resistens (VRE) dök upp.', kolla: ['Att provet kom från Borneo via en missionär är den version Eli Lilly själva berättar.'] },
@@ -2373,9 +2407,11 @@ document.addEventListener('click', e => {
   if (!m || e.target.closest('button') || m.closest('#modal')) return;
   const x = STRUKT[m.dataset.sid], s = byId(x.sub), hide = m.closest('.q-fig, .flash-front');
   $('#modal-body').innerHTML = `${hide ? '' : `<div class="plant-title" style="margin:.2rem 0 .8rem">${x.namn}<span class="sv">ur <i>${s.latin}</i> (${s.sv})</span></div>`}${molDiv(x.id)}`;
-  $('#modal').hidden = false;
+  openModal();
 });
-const molGridHTML = s => structsOf(s).length ? `<div class="mol-grid">${structsOf(s).map(x => `<div>${molDiv(x.id)}<div class="mol-cap">${x.namn}${x.not ? `<span class="bio">${x.not}</span>` : ''}</div></div>`).join('')}</div>` : '';
+// `stor` reaches the markup so that CSS can tell a sprawling molecule from a small one:
+// a lone small structure must not be stretched across the whole page.
+const molGridHTML = s => structsOf(s).length ? `<div class="mol-grid">${structsOf(s).map(x => `<div class="molruta${x.stor ? ' stor' : ''}">${molDiv(x.id)}<div class="mol-cap">${x.namn}${x.not ? `<span class="bio">${x.not}</span>` : ''}</div></div>`).join('')}</div>` : '';
 
 /* ---------- peptides: amino-acid beads ---------- */
 const AA_NAMN = { A: 'alanin', R: 'arginin', N: 'asparagin', D: 'asparaginsyra', C: 'cystein', E: 'glutaminsyra', Q: 'glutamin', G: 'glycin', H: 'histidin', I: 'isoleucin',
@@ -2464,8 +2500,9 @@ const FAKTA_RADER = [
   ['strukturer', 'Struktur <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)">(tryck för att förstora)</span>'],
   ['sekvens', 'Aminosyrasekvens'],
   ['mek', 'Verkningsmekanism'], ['anv', 'Användning'], ['biv', 'Biverkningar och säkerhet'], ['extra', 'Bra att veta'],
-  ['varianter', 'Nära släktingar'],
-  ['jamfor', 'Jämför och skilj']
+  ['varianter', 'Nära släktingar']
+  // 'jamfor' (Jämför och skilj) removed from the fact sheets on request. `skillnad` and
+  // `kontraster` are kept in the data because the quiz's "Jämför och skilj" theme uses them.
 ];
 /* A `variant` is a relative worth meeting but not worth memorising: penicillin V beside
    penicillin G, say. It gets a block on the parent's fact sheet with its structure and what
@@ -2508,46 +2545,71 @@ const TEXT_RADER = ['kallaText', 'klassText', 'framstText', 'mek', 'anv', 'biv',
 const detailHTML = s => {
   const foto = photoHTML(s), bild = structsOf(s).length || s.sekvens;
   if (foto) return masteHTML(s) + `<div class="detail-top"><div class="detail-photo">${foto}</div><div>${factsHTML(s, TEXT_RADER)}</div></div>` +
-    (bild ? `<div class="detail-structs">${factsHTML(s, ['sekvens', 'strukturer'])}</div>` : '') + factsHTML(s, ['jamfor']);
+    (bild ? `<div class="detail-structs">${factsHTML(s, ['sekvens', 'strukturer'])}</div>` : '');
   // no photo: the structures float to the side on a wide screen and the text wraps around them
   if (bild) return masteHTML(s) + `<div class="detail-flyt">
        <div class="detail-structs">${factsHTML(s, ['sekvens', 'strukturer'])}</div>
-       ${factsHTML(s, TEXT_RADER)}</div>${factsHTML(s, ['jamfor'])}`;
+       ${factsHTML(s, TEXT_RADER)}</div>`;
   return masteHTML(s) + factsHTML(s);
 };
 const titleHTML = (s, size = '') => `<div class="plant-title" style="margin:.2rem 0 .8rem;${size}">${s.namn}<span class="sv">ur ${orgHTML(s)} · ${GRUPP[s.grupp].ikon} ${GRUPP[s.grupp].namn}</span></div>`;
 function openSub(id) {
   const s = byId(id); if (!s) return;
   $('#modal-body').innerHTML = titleHTML(s) + detailHTML(s);
-  $('#modal').hidden = false;
-  $('#modal .sheet').scrollTop = 0;
+  openModal();
 }
 /* Overview page: how microbes and animals build these molecules, and how to read the bead pictures */
 function oversiktHTML() {
   const row = (t, v) => `<div class="frow"><dt>${t}</dt><dd>${v}</dd></div>`;
-  const lista = b => SUBSTANSER.filter(s => s.bio === b).map(subLink).join(', ') || '<span class="muted">–</span>';
-  return `<dl class="facts oversikt">
-    ${row('Varför mikrober?', 'Många bakterier (särskilt jordbakterier av släktet <i>Streptomyces</i>) och mögelsvampar bildar ämnen som hämmar konkurrerande mikrober. De är inte nödvändiga för organismens egen tillväxt (sekundärmetaboliter), och många har blivit läkemedel: antibiotika, immunsuppressiva, kolesterolsänkande och cancerläkemedel.')}
-    ${row('Varför djur?', 'Ormar, ödlor, snäckor och iglar har gifter och saliv med peptider som träffar mycket specifika mål i kroppen (enzymer, receptorer, jonkanaler). De har blivit läkemedel direkt, som syntetiska kopior, eller som förebilder för helt nya molekyler.')}
-    ${row(BIONAMN.NRPS, `Stora enzymer (peptidsyntetaser) fogar ihop aminosyror utan ribosom, en modul per byggsten. Därför kan de använda ovanliga byggstenar (D-aminosyror, N-metylerade aminosyror). Exempel: ${lista('NRPS')}.`)}
-    ${row(BIONAMN.PKS1, `Ett jättelikt enzym där varje modul förlänger kedjan med en acetat- eller propionatenhet; resultatet blir ofta en stor ring (makrolid). Exempel: ${lista('PKS1')}.`)}
-    ${row(BIONAMN.PKSit, `Svampar använder ett enda modul-set om och om igen (iterativt). Exempel: ${lista('PKSit')}.`)}
-    ${row(BIONAMN.PKS2, `Flera små enzymer bygger en kedja som veckas till aromatiska ringar. Exempel: ${lista('PKS2')}.`)}
-    ${row(BIONAMN.HYB, `Polyketidkedja och aminosyra i samma molekyl. Exempel: ${lista('HYB')}.`)}
-    ${row(BIONAMN.AMG, `Aminosocker och sockerliknande ringar från glukos. Exempel: ${lista('AMG')}.`)}
-    ${row(BIONAMN.ERG, `Tryptofan plus en isoprenenhet (DMAPP) ger ergolinskelettet (lysergsyra). Exempel: ${lista('ERG')}.`)}
-    ${row(BIONAMN.MERO, `Delvis polyketid, delvis terpen. Exempel: ${lista('MERO')}.`)}
-    ${row(BIONAMN.RIB, `Peptiden står i en gen och byggs på ribosomen, ofta som ett längre förstadium som klipps till. Bara de 20 vanliga aminosyrorna (men de kan ändras efteråt). Exempel: ${lista('RIB')}.`)}
-    ${row('Framställning', Object.values(FRAMST).map(t => `<div>• ${t}</div>`).join(''))}
-    ${row('Så läser du aminosyrasekvenser', `Peptider visas som en rad pärlor, en per aminosyra, med enbokstavskoder från aminoänden (H₂N–) till karboxyänden (–COOH, eller –NH₂ om änden är amiderad). Var tionde pärla är numrerad. Håll muspekaren över en pärla för att se namnet.${LEGEND}`)}
-  </dl>`;
+  const lista = b => SUBSTANSER.filter(s => s.bio === b).map(subLink).join(', ');
+  // a class with no substance left in the module is simply not shown, so removing a substance
+  // can never leave a heading with "Exempel: –" under it
+  const bioRad = (b, text) => { const l = lista(b); return l ? row(BIONAMN[b], `${text} Exempel: ${l}.`) : ''; };
+  /* Two columns that each belong to one of the two tracks: microbes on the left with the classes
+     their molecules are built by, animals on the right with theirs. Which column a class lands in
+     is derived — a class is "animal" only when every substance in it comes from an animal — so
+     the split stays right if the substance list changes. Framställning spans both, because it
+     applies to all of them. On a phone the grid collapses and the order is
+     microbe box → microbe classes → animal box → animal classes → framställning. */
+  const djurKlass = b => { const l = SUBSTANSER.filter(s => s.bio === b); return l.length && l.every(s => s.grupp === 'djur'); };
+  const klasser = [
+    ['NRPS', 'Stora enzymer (peptidsyntetaser) fogar ihop aminosyror utan ribosom, en modul per byggsten. Därför kan de använda ovanliga byggstenar (D-aminosyror, N-metylerade aminosyror).'],
+    ['PKS1', 'Ett jättelikt enzym förlänger kedjan en acetat- eller propionatenhet i taget, och varje modul bestämmer hur långt det nya syret reduceras. Resultatet blir ofta en stor ring (makrolid). Bakterier har som regel en modul per förlängning; svampar använder i stället ett enda modul-set om och om igen (iterativt), men principen är densamma.'],
+    ['PKS2', 'Flera små, fristående enzymer bygger en lång kedja som sedan veckas och sluts till platta aromatiska ringar.'],
+    ['AMG', 'Aminosocker och sockerliknande ringar från glukos.'],
+    ['ERG', 'Tryptofan plus en isoprenenhet (DMAPP) ger ergolinskelettet (lysergsyra); därefter hängs olika grupper på amiden.'],
+    ['MERO', 'Delvis polyketid, delvis terpen.'],
+    ['HYB', 'Polyketidkedja och aminosyra i samma molekyl, byggda av ett PKS och ett NRPS i samma produktionslinje.'],
+    ['RIB', 'Peptiden står i en gen och byggs på ribosomen, ofta som ett längre förstadium som klipps till. Bara de 20 vanliga aminosyrorna (men de kan ändras efteråt).']
+  ];
+  const spalt = djur => `<dl class="facts">${klasser.filter(([b]) => djurKlass(b) === djur).map(([b, t]) => bioRad(b, t)).join('')}
+    ${djur ? row('Så läser du aminosyrasekvenser', `Peptider visas som en rad pärlor, en per aminosyra, med enbokstavskoder från aminoänden (H₂N–) till karboxyänden (–COOH, eller –NH₂ om änden är amiderad). Var tionde pärla är numrerad. Håll muspekaren över en pärla för att se namnet.${LEGEND}`) : ''}</dl>`;
+  return `<div class="oversikt-rutnat">
+    <div class="ov-box ov-mikrob"><h3>🦠 Varför mikrober?</h3><p>Många bakterier (särskilt jordbakterier av släktet <i>Streptomyces</i>) och mögelsvampar bildar ämnen som hämmar konkurrerande mikrober. De är inte nödvändiga för organismens egen tillväxt (<b>sekundärmetaboliter</b>), och många har blivit läkemedel: antibiotika, immunsuppressiva, kolesterolsänkande och cancerläkemedel.</p></div>
+    <div class="ov-klasser ov-mikrob-klasser">${spalt(false)}</div>
+    <div class="ov-box ov-djur"><h3>🦎 Varför djur?</h3><p>Ormar, ödlor, snäckor och iglar har gifter och saliv med <b>peptider</b> som träffar mycket specifika mål i kroppen (enzymer, receptorer, jonkanaler). De har blivit läkemedel direkt, som syntetiska kopior, eller som förebilder för helt nya molekyler.</p></div>
+    <div class="ov-klasser ov-djur-klasser">${spalt(true)}</div>
+    <div class="ov-bred"><dl class="facts">${row('Framställning', Object.values(FRAMST).map(t => `<div>• ${t}</div>`).join(''))}</dl></div>
+  </div>`;
 }
 function openOversikt() {
   $('#modal-body').innerHTML = `<div class="plant-title" style="margin:.2rem 0 .8rem">🧬 Översikt<span class="sv">Hur mikrober och djur bygger läkemedelsmolekyler</span></div>${oversiktHTML()}`;
+  openModal();
+}
+/* Opening a modal does not move the page, but closing one used to leave the reader at the top
+   of the list instead of where they were — so following a link out of the Översikt and back
+   lost your place. Remember the scroll position while a modal is open and put it back. */
+let modalScroll = 0;
+function openModal() {
+  if ($('#modal').hidden) modalScroll = window.scrollY;
   $('#modal').hidden = false;
   $('#modal .sheet').scrollTop = 0;
 }
-function closeModal() { $('#modal').hidden = true; }
+function closeModal() {
+  const var_oppen = !$('#modal').hidden;
+  $('#modal').hidden = true;
+  if (var_oppen) window.scrollTo(0, modalScroll);
+}
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
@@ -2643,24 +2705,58 @@ $('#tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); 
 function viewHome() {
   const known = store.get('known', []).length, n = SUBSTANSER.length;
   const antal = g => SUBSTANSER.filter(s => s.grupp === g).length;
+  const gjorda = resaKlara().length;
   app.innerHTML = `<div class="home-grid">
     <div class="card">
       <h2>Välkommen!</h2>
-      <p>Här övar du på kursens ${n} läkemedel från ${antal('svamp')} svampar, ${antal('bakterie')} bakterier och ${antal('djur')} djur: vilken organism de kommer från, hur de byggs upp, hur de verkar, vad de används till och vad man ska se upp med.</p>
-      <p class="muted small">Tips: läs först under <b>Fakta</b> (börja gärna med <button class="linkbtn" onclick="openOversikt()">Översikt</button>), öva sedan med faktakort, quiz och parning. Ditt resultat sparas bara i din egen webbläsare.</p>
+      <p>Det här är övningsmaterialet inför seminariet <b>Läkemedel från svampar, djur och bakterier</b>. Här finns kursens ${n} läkemedel från ${antal('svamp')} svampar, ${antal('bakterie')} bakterier och ${antal('djur')} djur: vilken organism de kommer från, hur de byggs upp, hur de verkar, vad de används till och vad man ska se upp med.</p>
+      <div class="borja-har">
+        <b>👉 Börja med Upptäcktsresan.</b>
+        <p>Där går du igenom hur ett läkemedel faktiskt hittas — från observation till färdigt preparat — och gör varje steg själv på ett riktigt fall. <b>Du behöver inte kunna något i förväg.</b> Resten av sidan är till för att nöta in detaljerna efteråt.</p>
+        <div class="btn-row"><button class="btn btn-main" onclick="go('resa')">▶ ${gjorda ? `Fortsätt Upptäcktsresan (${gjorda} av ${FALL.length} klara)` : 'Börja Upptäcktsresan'}</button>
+          <button class="btn" onclick="openValkommen(true)">Vad finns här?</button></div>
+      </div>
+      <p class="muted small">Ditt resultat sparas bara i din egen webbläsare.</p>
       ${weakest().length ? `<div class="svaga"><b>🎯 Dina svagaste substanser just nu:</b>
         ${weakest().map(id => subLink(byId(id))).join(', ')}
         <div class="btn-row" style="margin-top:.6rem"><button class="btn btn-main" onclick="startFokus(weakest())">Öva på dem</button>
         <button class="btn" onclick="if(confirm('Nollställa dina resultat?')){store.set('stats',{});store.set('qvikt',{});store.set('antalSvar',0);viewHome()}">↺ Nollställ</button></div></div>`
       : antalSvar() > 0 && antalSvar() < SVAGA_MIN_TOTALT ? `<p class="small muted svaga">🎯 När du har svarat på ${SVAGA_MIN_TOTALT} frågor visas här vilka substanser du har svårast för (du har svarat på ${antalSvar()}).</p>` : ''}
     </div>
+    <!-- Upptäcktsresan first and marked, since it is the recommended way in -->
     <div class="tiles">
+      <button class="tile tile-forst" onclick="go('resa')"><span class="ico">🔬</span><span><b>Upptäcktsresan <span class="tile-mark">börja här</span></b><span class="d">Hur ett läkemedel hittas — från observation till färdigt preparat. ${gjorda} av ${FALL.length} resor gjorda.</span></span></button>
       <button class="tile" onclick="go('fakta')"><span class="ico">📖</span><span><b>Fakta</b><span class="d">Läs om alla substanser, med strukturer och aminosyrasekvenser.</span></span></button>
       <button class="tile" onclick="go('kort')"><span class="ico">🃏</span><span><b>Faktakort</b><span class="d">Tänk efter, vänd kortet och se om du hade rätt. Du kan ${known} av ${n} substanser.</span></span></button>
-      <button class="tile" onclick="go('resa')"><span class="ico">🔬</span><span><b>Upptäcktsresan</b><span class="d">Lär dig hur ett läkemedel upptäcks — screening, fraktionering, strukturbestämning — och gör det själv på ett riktigt fall. Du behöver inte kunna något i förväg.</span></span></button>
       <button class="tile" onclick="go('quiz')"><span class="ico">❓</span><span><b>Quiz</b><span class="d">5–20 frågor: flerval, strukturer, peptider och skriv latinska namn. Välj ett eller flera teman.</span></span></button>
       <button class="tile" onclick="go('para')"><span class="ico">🔗</span><span><b>Para ihop</b><span class="d">Para ihop substanser med rätt organism eller rätt användning.</span></span></button>
     </div></div>`;
+}
+/* Shown once, the first time the module is opened. `tvinga` reopens it from the start page.
+   The version string means the greeting can be shown again if it is ever rewritten. */
+const VALKOMMEN = 'v1';
+function openValkommen(tvinga) {
+  if (!tvinga && store.get('valkommen', '') === VALKOMMEN) return;
+  store.set('valkommen', VALKOMMEN);
+  $('#modal-body').innerHTML = `<div class="valkommen">
+    <div class="plant-title" style="margin:.2rem 0 1rem">🦠 Läkemedel från svampar, djur och bakterier<span class="sv">Övningsmaterial inför seminariet</span></div>
+    <p>Den här sidan är till för att förbereda dig inför seminariet. Den innehåller kursens <b>${SUBSTANSER.length} läkemedel</b> — var de kommer ifrån, hur organismen bygger dem, hur de verkar och vad de används till.</p>
+    <div class="borja-har">
+      <b>👉 Börja med Upptäcktsresan.</b>
+      <p>Där följer du hur ett läkemedel faktiskt hittades, steg för steg: valet av uppslag och bioassay, extraktionen, separationen, strukturbestämningen och vägen fram till ett färdigt preparat. Vid varje steg får du <b>först lära dig hur arbetet går till</b> och sedan använda det på ditt eget fall. Du behöver inte kunna något i förväg, och vilket läkemedel det blir får du veta först på slutet.</p>
+    </div>
+    <p>Resten av sidan är till för att nöta in detaljerna när du förstått sammanhanget:</p>
+    <dl class="facts">
+      <div class="frow"><dt>📖 Fakta</dt><dd>Faktablad för varje substans, med strukturer, biosyntes och aminosyrasekvenser. Börja gärna med <b>Översikt</b>, som förklarar hur mikrober och djur bygger sina molekyler på olika sätt.</dd></div>
+      <div class="frow"><dt>🃏 Faktakort</dt><dd>Se en struktur eller en sekvens, tänk efter, vänd kortet. Besläktade ämnen kommer efter varandra så att skillnaden syns.</dd></div>
+      <div class="frow"><dt>❓ Quiz</dt><dd>5–20 frågor i elva teman. Frågor du svarat fel på kommer tillbaka oftare.</dd></div>
+      <div class="frow"><dt>🔗 Para ihop</dt><dd>Snabbövning: substans mot organism, eller substans mot användning.</dd></div>
+    </dl>
+    <p class="small muted">Allt du gör sparas bara i din egen webbläsare — ingenting skickas någonstans, och ingen ser dina resultat.</p>
+    <div class="btn-row"><button class="btn btn-main" onclick="closeModal();go('resa')">▶ Börja med Upptäcktsresan</button>
+      <button class="btn" onclick="closeModal()">Titta runt själv</button></div>
+  </div>`;
+  openModal();
 }
 
 /* ============================ fakta ============================ */
@@ -3603,7 +3699,9 @@ function balanserad(html) {
   for (const c of text) { if (c === '(') par++; else if (c === ')') par--; if (par < 0) return false; }
   return par === 0 && !((text.match(/"/g) || []).length % 2) && !((text.match(/”/g) || []).length % 2);
 }
-function korta(html, minsta = 110) {   // ~110 chars → a lead of about two short sentences
+/* 140 chars: median lead ~38 words, nothing over 58. Pushing to 145+ makes one case jump to
+   73 and then 92 words, because the next sentence boundary there is a long way off. */
+function korta(html, minsta = 140) {
   if (!html) return { kort: '', resten: '' };
   const re = /\.\s+(?=[A-ZÅÄÖ<])/g;   // sentence end followed by a new sentence or a tag
   let m;
@@ -3723,7 +3821,12 @@ function resaKlar() {
   window.scrollTo(0, 0);
 }
 
-window.addEventListener('DOMContentLoaded', () => { startRDKit(); go(location.hash.slice(1)); });
+window.addEventListener('DOMContentLoaded', () => {
+  startRDKit();
+  go(location.hash.slice(1));
+  // only on the start page: arriving on a deep link means they already know where they are
+  if (!location.hash || location.hash === '#hem') openValkommen();
+});
 </script>
 
 <!-- =====================================================================
