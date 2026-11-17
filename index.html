@@ -20,11 +20,16 @@
   --bad: #f43f5e; --bad-bg: rgba(244,63,94,.16); --amber: #fbbf24;
 }
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+/* Everything in the file is sized in rem, so the root size is the one knob that scales
+   the whole page — headings, labels and captions included. Body used to be 17px while
+   the root stayed at the browser default 16px, which left all the .78–.95rem text
+   anchored to 16px and reading noticeably small on a desktop monitor. */
+html { -webkit-text-size-adjust: 100%; font-size: 17px; }
+@media (min-width: 1024px) { html { font-size: 18.5px; } }
 body {
   margin: 0; background: var(--bg); color: var(--text);
   font-family: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  font-size: 17px; line-height: 1.5;
+  font-size: 1rem; line-height: 1.55;
   /* keeps the last buttons clear of the Android/iOS navigation bar (Pixel 7) */
   padding-bottom: calc(2rem + env(safe-area-inset-bottom));
   -webkit-tap-highlight-color: transparent;
@@ -46,6 +51,18 @@ nav.tabs::-webkit-scrollbar { display: none; }
   padding: .35rem .85rem; font-weight: 700; font-size: .95rem; color: var(--soft); white-space: nowrap;
 }
 .tab:hover { background: var(--panel2); }
+/* Two shortcuts parked in the top right of the header, to the pages students ask for by name.
+   They are not tabs: no active state, and they are hidden on phones, where the header collapses
+   to the title plus a single Start button. */
+/* `display: contents` makes the two buttons direct flex children of nav.tabs, so they sit in the
+   tab row with the row's own .4rem gap: "Vad ska jag kunna?" follows Upptäcktsresan as the fourth
+   item, and only "Seminariefrågor" is pushed to the far right by the auto margin. The wrapper
+   exists so the pair can be hidden in one rule on phones, where the whole nav goes. */
+.genvagar { display: contents; }
+.genvagar .genvag:last-child { margin-left: auto; }
+.genvag { flex: none; border: 2px solid var(--line); background: var(--bg); border-radius: 9999px;
+  padding: .3rem .7rem; font-weight: 700; font-size: .85rem; color: var(--soft); white-space: nowrap; }
+.genvag:hover { background: var(--panel2); color: #fff; }
 .home-btn { display: none; }
 /* phones: no menu and no fixed bar; a single "Start" button leads back to the start page */
 @media (max-width: 640px) {
@@ -53,6 +70,7 @@ nav.tabs::-webkit-scrollbar { display: none; }
   .top-inner { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
   h1 { font-size: 1.3rem; margin: 0; }
   nav.tabs { display: none; }
+  .genvagar { display: none; }
   .home-btn { display: inline-flex; flex: none; padding: .4rem .9rem; font-size: .95rem; }
   body[data-view="hem"] .home-btn { display: none; }
 }
@@ -233,6 +251,20 @@ details.plant .body { padding: 0 1rem 1rem; }
 .borja-har > b { display: block; font-size: 1.1rem; color: #fff; margin-bottom: .3rem; }
 .borja-har p { margin: 0 0 .8rem; }
 .borja-har .btn-row { margin: 0; }
+/* the "what am I supposed to know" strip at the top of the start page */
+.mal-banner { display: flex; align-items: center; gap: .9rem; width: 100%; text-align: left;
+  background: var(--panel2); border: 2px solid var(--line); border-radius: .9rem; padding: .75rem 1rem; margin: 0 0 1rem; }
+.mal-banner:hover { border-color: var(--acc); background: #22324a; }
+/* seminariefrågorna: numrerade deluppgifter a), b), c) och fallrutan i fråga 8 */
+.sem-delar { margin: .6rem 0 0; padding-left: 1.4rem; list-style: lower-alpha; }
+.sem-delar li { margin-bottom: .45rem; }
+.sem-delar li::marker { color: var(--acc-hi); font-weight: 700; }
+.sem-fall { margin: .6rem 0 0; padding: .7rem .95rem; border-left: 3px solid var(--acc);
+  background: var(--bg); border-radius: 0 .6rem .6rem 0; color: var(--soft); }
+.mal-banner .ico { font-size: 1.5rem; line-height: 1; }
+.mal-banner b { display: block; color: #fff; font-size: 1.05rem; }
+.mal-banner .d { color: var(--soft); font-size: .92rem; }
+.mal-banner .mal-pil { margin-left: auto; color: var(--soft); font-size: 1.6rem; line-height: 1; }
 .tile-forst { border-color: var(--acc); }
 .tile-mark { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; background: var(--acc); color: #06281c;
   border-radius: 9999px; padding: .1rem .5rem; margin-left: .4rem; vertical-align: .1rem; font-weight: 700; }
@@ -289,6 +321,15 @@ details.plant .body { padding: 0 1rem 1rem; }
   display: flex; align-items: center; justify-content: center; color: #64748b; font-size: .85rem; text-align: center; padding: 1rem; }
 .mol3d.fel3d::after { content: '3D-strukturen kunde inte visas.'; }
 .mol3d-cap { font-size: .82rem; text-align: center; margin-top: .25rem; color: var(--muted); }
+/* "Visa större" sits on top of the 3D box. It is hidden on phones and tablets: the big view is a
+   modal you rotate with the mouse, and on a touch screen the small box already fills the width. */
+.mol3d-wrap { position: relative; }
+.mol3d-zoom { display: none; position: absolute; right: .45rem; bottom: .45rem; background: rgba(15,23,42,.84);
+  color: #e2e8f0; border: 1px solid var(--line); border-radius: .6rem; padding: .3rem .6rem; font-size: .8rem; font-weight: 700; }
+.mol3d-zoom:hover { background: var(--acc); border-color: var(--acc); color: #06281c; }
+@media (min-width: 1024px) { .mol3d-zoom { display: block; } }
+/* The big one drops the 4:3 box and takes the height it can get instead. */
+.mol3d-stor { aspect-ratio: auto; height: min(68vh, 620px); }
 .mol .mol-err { color: #64748b; font-size: .85rem; padding: 1rem; text-align: center; }
 .mol-cap { font-size: .92rem; text-align: center; margin-top: .25rem; color: var(--soft); }
 .mol-big { max-width: 560px; margin: 0 auto .6rem; }
@@ -488,6 +529,10 @@ ul.begrepp li { margin: .1rem 0; }
   .top-inner, main { max-width: 1800px; }
   .top-inner { display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
   h1 { margin: 0; white-space: nowrap; }
+  /* Between 1024 and 1439 the header is a single row and the full title leaves the nav too
+     little room, so the subtitle half is dropped and the heading reads just "Farmakognosi".
+     Below 1024 the nav sits on its own row and the full title fits again. */
+  @media (max-width: 1439px) { .h1-lang { display: none; } }
   nav.tabs { margin: 0; padding: 0; overflow: visible; flex-wrap: wrap; justify-content: flex-end; }
   main { padding: 1.5rem 1.5rem; }
   header.top { padding-left: 1.5rem; padding-right: 1.5rem; }
@@ -623,14 +668,16 @@ a.doi:hover { text-decoration: underline; }
 
 <header class="top">
   <div class="top-inner">
-    <h1>🦠 Farmakognosi: läkemedel från mikrober och djur</h1>
+    <h1>🦠 Farmakognosi<span class="h1-lang">: läkemedel från mikrober och djur</span></h1>
     <button class="tab home-btn" onclick="go('hem')">🏠 Start</button>
     <nav class="tabs" id="tabs" aria-label="Övningar">
       <button class="tab" data-view="hem">🏠 Start</button>
       <button class="tab" data-view="fakta">📖 Fakta</button>
-      <button class="tab" data-view="quiz">❓ Quiz</button>
       <button class="tab" data-view="resa">🔬 Upptäcktsresan</button>
-      <button class="tab" data-view="para">🔗 Para ihop</button>
+      <span class="genvagar">
+        <button class="genvag" onclick="go('mal')" title="Vad ska jag kunna?">🎯 Mål</button>
+        <button class="genvag" onclick="go('seminarium')" title="Seminariefrågor">💬 Seminarium</button>
+      </span>
     </nav>
   </div>
 </header>
@@ -2717,9 +2764,9 @@ const SPAR = {
   mikrob: { namn: 'Bakterier och svampar', ikon: '🦠', kort: 'PKS och NRPS',
     text: 'Mikrober bygger sina ämnen med <b>enzymatiska löpande band</b> — polyketidsyntaser (PKS) och icke-ribosomala peptidsyntetaser (NRPS). Därför får man stora ringar, acetatkedjor, D-aminosyror och metylerade kväven: byggstenar ribosomen aldrig skulle kunna använda. Spåret börjar i mjöldrygan 1918, får sin vändpunkt i en slump 1928 och blir till en industri: slumpen blir metod, metoden riktas mot nya problem, och till sist letar man inte längre efter något som dödar en organism utan efter något som hämmar ett bestämt enzym.' },
   djur: { namn: 'Djur', ikon: '🦎', kort: 'ribosomala peptider',
-    text: 'Djur bygger på <b>ribosomen</b>, efter en gen. Därför är ämnena här peptider och proteiner av helt vanliga L-aminosyror — inga D-former, inga metylerade kväven. Det ger dem en gemensam styrka: de träffar mycket exakt, ofta kroppens egna receptorer. Och en gemensam svaghet, som återkommer i varje resa: <b>en peptid kan inte sväljas.</b><br><br>Djuren själva har löst det problemet före oss, och lösningen syns i kemin. Ett <b>aktivt gift</b> (venom) sprutas in med huggtand, harpun eller gadd och går därmed förbi magsäcken — därför <i>får</i> det vara en peptid, och är det nästan alltid: konotoxiner, ormgifternas neurotoxiner, peptiden bakom kaptopril. Ett <b>passivt gift</b> (poison) måste ätas för att verka alls, och måste därför tåla magsyra och tarmens enzym — därför är det oftast en liten, stabil molekyl som inte är någon peptid, som tetrodotoxinet i blåsfisk eller flugsvampens amatoxiner. Kägelsnäckan löser med sin harpun exakt det problem vi löser med en spruta och en pump. Spåret ger tre olika svar på det problemet under drygt sjuttio år.' },
-  marin: { namn: 'Havets djur och deras mikrober', ikon: '🪸', kort: 'vem gör molekylen?',
-    text: 'I havet duger inte den vanliga frågan ”vilken organism bildar ämnet?”. Du håller ett svampdjur i handen, men molekylen kan komma från en <b>bakterie som lever inuti djuret</b>, från något djuret har <b>ätit</b>, eller från djuret självt. Spåret handlar om hur man tar reda på vilket, och varför svaret avgör om fyndet kan bli ett läkemedel: <b>det du inte kan odla kan du inte heller tillverka.</b> Fyra fall: ett där försörjningen aldrig löstes, två där den löstes på var sitt sätt, och ett där problemet visade sig vara ett helt annat.<br><br>Själva hindret håller dock på att ge vika. Med nya odlingstekniker, där bakterierna får växa i sin egen miljö i stället för på en platta (<i>iChip</i>), har man sedan 2015 fått fram arter som tidigare räknades som omöjliga att odla — så upptäcktes antibiotikumet <b>teixobaktin</b>. Det som i de här fyra fallen var en återvändsgränd är alltså inte med nödvändighet det i morgon.' }
+    text: 'Djur bygger på <b>ribosomen</b>, efter en gen. Därför är ämnena här peptider av helt vanliga L-aminosyror — inga D-former, inga metylerade kväven. Det ger en gemensam styrka: de träffar mycket exakt, ofta kroppens egna receptorer. Och en gemensam svaghet: <b>en peptid kan inte sväljas.</b> Djuren löste det före oss: ett <b>aktivt gift</b> (venom) sprutas in förbi magsäcken och får därför vara en peptid, medan ett <b>passivt gift</b> (poison) måste ätas och sällan är det. Kägelsnäckan löser med sin harpun exakt det problem vi löser med en spruta.' },
+  marin: { namn: 'Havets djur och mikrober', ikon: '🪸', kort: 'vem gör molekylen?',
+    text: 'I havet duger inte den vanliga frågan ”vilken organism bildar ämnet?”. Du håller ett svampdjur i handen, men molekylen kan komma från en <b>bakterie som lever inuti djuret</b>, från något djuret har <b>ätit</b>, eller från djuret självt. Spåret handlar om hur man tar reda på vilket, och varför svaret avgör om fyndet kan bli ett läkemedel: <b>det du inte kan odla kan du inte heller tillverka.</b> Fyra fall: ett där försörjningen aldrig löstes, två där den löstes på var sitt sätt, och ett där problemet visade sig vara ett helt annat. I tre av de fyra är det inte djuret som bygger molekylen.' }
 };
 const ARV = {
   ergotamin: { spar: 'mikrob',
@@ -2933,8 +2980,22 @@ const PDB3D = {
    och konotoxinet skulle sudda ut just den skillnad modulen är byggd för att lära ut. Teprotid
    hör hit men saknar struktur i PDB, så det kortet visar bara sekvensen. */
 const mol3dDiv = s => PDB3D[s.id]
-  ? `<div class="mol3d wait" data-sub="${s.id}"></div><div class="mol3d-cap">${PDB3D[s.id].not} <span class="muted">(PDB ${PDB3D[s.id].id})</span></div>`
+  ? `<div class="mol3d-wrap"><div class="mol3d wait" data-sub="${s.id}"></div>
+      <button class="mol3d-zoom" onclick="openMol3d('${s.id}')" title="Visa strukturen i större format">⤢ Visa större</button></div>
+     <div class="mol3d-cap">${PDB3D[s.id].not} <span class="muted">(PDB ${PDB3D[s.id].id})</span></div>`
   : '';
+/* The big view is the same viewer in the modal, only taller. fyll3D() picks up any .mol3d.wait
+   anywhere in the document, so the markup is all that is needed. */
+function openMol3d(id) {
+  const s = byId(id), spec = PDB3D[id];
+  if (!s || !spec) return;
+  $('#modal-body').innerHTML = `<h2 style="margin:.2rem 0 .6rem">${s.namn} i 3D</h2>
+    <div class="mol3d mol3d-stor wait" data-sub="${id}"></div>
+    <p class="mol3d-cap" style="font-size:.95rem; text-align:left; margin-top:.6rem">${spec.not} <span class="muted">(PDB ${spec.id})</span></p>
+    <p class="small muted">Dra för att vrida, rulla för att zooma.</p>`;
+  openModal();
+  fyll3D();
+}
 function fyll3D() {
   if (typeof $3Dmol === 'undefined') return;
   document.querySelectorAll('.mol3d.wait').forEach(el => {
@@ -3141,7 +3202,7 @@ const varianterHTML = s => !(s.varianter || []).length ? '' :
         ${v.kort ? `<span class="variant-kort">${v.kort}</span>` : ''}
         <p>${v.text}</p></div>
     </div>`).join('')}
-    <p class="small muted">Släktingar som är värda att känna igen. De frågas inte i quizen. Det är ${s.namn} du ska kunna.</p></div>`;
+    <p class="small muted">Släktingar som är värda att känna igen. Det är ${s.namn} du ska kunna.</p></div>`;
 /* The same sections as factVal, but as a list of PARAGRAPHS. On a balanced fact sheet a
    section may be continued at the top of the right column, but only between paragraphs, never
    inside one. Sections that are a single paragraph are a list of one. */
@@ -3216,7 +3277,8 @@ const raderHTML = (s, keys) => FAKTA_RADER.filter(([k]) => keys.includes(k))
     ? `<div class="frow" data-sektion="${k}"><dt>${t}</dt><dd>${p}</dd></div>`
     : `<div class="frow fort" data-sektion="${k}" data-rubrik="${t.replace(/<[^>]+>/g, '')}"><dd>${p}</dd></div>`).join('')).join('');
 // a peptide's 3D shape as a fact-sheet tile: the box, and a one-line label under it
-const mol3dRutaHTML = s => `<figure class="molruta pep3d"><div class="mol3d wait" data-sub="${s.id}"></div>
+const mol3dRutaHTML = s => `<figure class="molruta pep3d"><div class="mol3d-wrap"><div class="mol3d wait" data-sub="${s.id}"></div>
+  <button class="mol3d-zoom" onclick="openMol3d('${s.id}')" title="Visa strukturen i större format">⤢ Visa större</button></div>
   <figcaption class="mol-cap">${PDB3D[s.id].kort}<span class="bio">3D, PDB ${PDB3D[s.id].id} · dra för att vrida</span></figcaption></figure>`;
 function bilderHTML(s) {
   const lista = structsOf(s).filter(x => !x.variant), foto = photoHTML(s, false, true);
@@ -3435,8 +3497,338 @@ function closeModal() {
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
+/* ============================ vad ska jag kunna? ============================
+   LUKE: den här sidan är din. Stycket märkt SYFTE nedan är ett utkast — skriv om det
+   med dina egna ord. Resten (listan över vad modulen tränar) följer av innehållet i
+   modulen och behöver bara ändras om du lägger till eller tar bort något. */
+function viewMal() {
+  app.innerHTML = `<div class="card">
+    <h2>🎯 Vad ska jag kunna?</h2>
+
+    <!-- SYFTE: skriv om det här stycket med dina egna ord. -->
+    <p>Resten av kursen handlar om <b>växter</b>, och det gör kursboken också. Den här modulen handlar om läkemedlen som kommer från svampar, bakterier och djur i stället. Poängen är inte sjutton läkemedel till att lära sig utantill, utan att de här organismerna bygger sina molekyler på olika sätt — och att det avgör vad för slags läkemedel det kan bli.</p>
+
+    <h3>Kursmålen modulen är byggd för</h3>
+    <dl class="facts">
+      <div class="frow"><dt>Mål 1</dt><dd><i>”förklara <b>naturprodukters roll vid utveckling och framställning av läkemedel</b> och de grundläggande principerna för läkemedelsutveckling från naturprodukter såsom <b>urvalsprinciper</b>, dokumentation, regelverk och principer kring <b>biodiversitet</b>, intellektuella rättigheter och <b>hållbar utveckling</b>”</i>
+        <br><span class="muted">Här: hur ett läkemedel faktiskt hittas, och vad som avgör om ett fynd någonsin blir ett läkemedel.</span></dd></div>
+      <div class="frow"><dt>Mål 2</dt><dd><i>”tillämpa kunskaper om <b>biosyntes av primära och sekundära metaboliter</b> hos levande organismer samt grundläggande principer för de bildade kemiska substansernas <b>struktur, klassificering och egenskaper</b>”</i>
+        <br><span class="muted">Här: skilja på sätten att bygga en molekyl, och kunna läsa ut vilket som använts ur strukturen.</span></dd></div>
+      <div class="frow"><dt>Mål 3</dt><dd><i>”visa grundläggande kunskaper om och kunna beskriva uppkomst, utveckling och <b>diversitet hos de viktigaste grupperna av organismer på jorden</b>”</i>
+        <br><span class="muted">Här: varför svampar, bakterier och djur ger andra ämnen än växter — och än varandra.</span></dd></div>
+    </dl>
+
+    <div class="borja-har">
+      <b>Förstå principerna, och kunna ge exempel</b>
+      <p>Tyngdpunkten ligger på <b>varför</b>: varför en måltavla som liknar vår egen ger ett smalt dosfönster, varför biosyntesvägen avgör om ett ämne kan sväljas, varför sållet bestämmer vad man kan hitta. Och att förstå ett sådant resonemang är att kunna ge ett <b>exempel</b> på det.</p>
+      <p class="small">Faktabladen innehåller betydligt mer än du behöver ha i huvudet. De är ett uppslagsverk att gå till när du vill belägga något — inte en lista att plugga utantill.</p>
+    </div>
+
+    <h3>1. Skilja på de fem sätten att bygga</h3>
+    <p><b>Ribosomal peptid, RiPP, NRPS, PKS typ I och PKS typ II.</b> Du ska kunna hålla isär dem, och kunna se på en struktur vilket av dem som använts. Det är inget du lär dig på ett ställe — begreppen återkommer genom hela kursen, och i den här modulen i varje del av den.${BIOSYNTESLANK ? ` <a href="${BIOSYNTESLANK}" target="_blank" rel="noopener">Öva på att känna igen dem här ↗</a>` : ''}</p>
+
+    <h3>2. Förklara varför källan spelar roll</h3>
+    <p>Varför svampar, bakterier och djur ger andra sorters molekyler än växter — och än varandra — och vad det får för följder för läkemedlet: hur det måste ges, och hur det kan tillverkas.</p>
+
+    <h3>3. Beskriva hur läkemedelsutveckling ur naturen går till</h3>
+    <p><b>Hela kedjan</b>, från ett första uppslag till ett färdigt läkemedel: <b>Uppslaget, Extraktion, Separation, Strukturbestämning</b> och <b>Från naturprodukt till läkemedel</b>. Det är så läkemedelsutveckling ur naturen går till, och de fem stegen återkommer i varje modul på kursen.</p>
+    <!-- LUKE: vilka av de fem stegen gör de faktiskt på laborationen? Meningen nedan är
+         medvetet vag tills det är fastslaget — tidigare stod det "steg 2–4", vilket jag inte
+         hade belägg för. -->
+    <p>Delar av det här gör du själv med händerna på laborationen. Här ser du <b>hela processen</b> i stället, och vad som avgör i varje steg: varför man valde som man gjorde, 1928, 1940 och i dag.</p>
+
+    <div class="btn-row">
+      <button class="btn btn-main" onclick="go('resa')">▶ Till Upptäcktsresan</button>
+      <button class="btn" onclick="go('hem')">🏠 Till startsidan</button>
+    </div>
+  </div>`;
+}
+
+/* ============================ peptid- och polyketidbiosyntes ============================
+   Övningsfrågorna om ribosomala peptider, RiPP, NRPS och PKS ligger på en egen sida. Adressen
+   står i BIOSYNTESLANK: brickan på startsidan, länken i målsidans avsnitt 1 och länken i
+   seminariefråga 9 öppnar den i en ny flik. Töms strängen visar brickan viewBiosyntes här
+   under i stället, och länkarna försvinner — det finns alltså bara ett ställe att ändra på. */
+const BIOSYNTESLANK = 'https://robertson922.github.io/biosynth2/';
+function oppnaBiosyntes() {
+  if (BIOSYNTESLANK) { window.open(BIOSYNTESLANK, '_blank', 'noopener'); return; }
+  go('biosyntes');
+}
+function viewBiosyntes() {
+  app.innerHTML = `<div class="card">
+    <h2>🧬 Peptid- och polyketidbiosyntes — övningsfrågor</h2>
+    <p>Övningsfrågorna på hur ribosomen, NRPS och PKS bygger sina molekyler ligger inte här ännu. De läggs till inför seminariet.</p>
+    <p>Under tiden finns samma sak att läsa i modulen: <b>Översikt</b> under Fakta går igenom skillnaden mellan byggsätten.</p>
+    <div class="btn-row">
+      <button class="btn btn-main" onclick="go('fakta')">📖 Till Fakta</button>
+    </div>
+  </div>`;
+}
+
+/* ============================ seminariefrågor ============================
+   The same nine questions as SEMINARIEFRAGOR_STUDENT.md beside this file. If you change one,
+   change the other — the markdown file is what gets printed or uploaded, this is what students
+   read on their phone. Teacher notes and model answers live in SEMINAR_QUESTIONS_EN.md and are
+   deliberately NOT here.
+   Set SEMINARIELANK to a URL (Studium, a PDF) and the tile and the shortcut open that instead. */
+const SEMINARIELANK = '';
+function oppnaSeminarium() {
+  if (SEMINARIELANK) { window.open(SEMINARIELANK, '_blank', 'noopener'); return; }
+  go('seminarium');
+}
+function viewSeminarium() {
+  const fr = (n, rubrik, brod, delar, bakgrund) => `<div class="card" style="margin-top:1rem">
+    <h3 style="color:#fff">${n}. ${rubrik}</h3>${brod}
+    <ol class="sem-delar">${delar.map(d => `<li>${d}</li>`).join('')}</ol>
+    ${bakgrund ? `<p class="small muted">Bakgrund: ${bakgrund}</p>` : ''}</div>`;
+  app.innerHTML = `<div class="card">
+    <h2>💬 Seminariefrågor</h2>
+    <p>Förbered dig med övningsmodulen, särskilt <b>Upptäcktsresan</b>. Webbföreläsningarna (Droger 8 Fungi, Droger 9 Animalia, Droger 11 Bakterier) ger bakgrunden till flera av frågorna.</p>
+    <p>Ni diskuterar i grupp först och sedan gemensamt. Ingen fråga har ett enda rätt svar som går att slå upp — det är resonemanget som räknas. <b>Fråga 8 och 9 går vi igenom tillsammans på plats.</b></p>
+  </div>
+
+  ${fr(1, 'Hur annorlunda är måltavlan?',
+    `<p>Fyra läkemedel som alla ska döda något främmande inuti en patient:</p>
+     <dl class="facts">
+       <div class="frow"><dt>bensylpenicillin</dt><dd>angriper bakteriens cellvägg</dd></div>
+       <div class="frow"><dt>ivermektin</dt><dd>angriper glutamatstyrda kloridkanaler hos maskar och insekter</dd></div>
+       <div class="frow"><dt>amfotericin B</dt><dd>angriper ergosterol i svampens cellmembran</dd></div>
+       <div class="frow"><dt>doxorubicin</dt><dd>angriper DNA och topoisomeras II i cancercellen</dd></div>
+     </dl>`,
+    ['Rangordna dem efter hur skonsamma ni <i>förväntar</i> er att de är, utifrån måltavlan ensam och innan ni slår upp något.',
+     'Slå upp biverkningarna i faktabladen. Var höll er förutsägelse, och var sprack den?',
+     'Formulera regeln ni kommer fram till i en mening.'],
+    'Droger 8, om svamparna som djurrikets närmaste släktingar.')}
+
+  ${fr(2, 'Varför kan man svälja den ena men inte de andra?',
+    `<dl class="facts">
+       <div class="frow"><dt>ciklosporin</dt><dd>11 byggstenar — <b>tablett</b></dd></div>
+       <div class="frow"><dt>exenatid</dt><dd>39 byggstenar — injektion under huden</dd></div>
+       <div class="frow"><dt>insulin</dt><dd>51 byggstenar — injektion under huden</dd></div>
+       <div class="frow"><dt>zikonotid</dt><dd>25 byggstenar — pump, direkt i ryggmärgsvätskan</dd></div>
+     </dl>`,
+    ['Ciklosporin är varken minst eller störst. Varför är det ändå det enda som går att svälja?',
+     'Vad säger svaret om <b>vem som byggde</b> molekylen?',
+     'Varför räcker det inte med en vanlig spruta för zikonotid?',
+     'Kägelsnäckan sprutar in sin peptid. Blåsfiskens tetrodotoxin måste ätas för att skada. Varför följer kemin den skillnaden så noga?'],
+    'Droger 9, aktiva och passiva gifter.')}
+
+  ${fr(3, 'Fyra svar på samma problem',
+    `<p>Fyra marina ämnen stötte alla på samma vägg: <i>det går inte att få fram tillräckligt.</i> Fjorton ton mossdjur gav arton gram bryostatin. 600 kilo svampdjur gav 12,5 milligram halikondrin B.</p>`,
+    ['Para ihop <b>bryostatin</b>, <b>trabektedin</b>, <b>eribulin</b> och <b>MMAE</b> med hur försörjningsproblemet löstes — eller inte löstes. Ett av ämnena är fortfarande inget läkemedel. Är det för att försörjningen aldrig gick att lösa?',
+     'Ett av de fyra hade egentligen aldrig något försörjningsproblem. Vilket, och vad var problemet i stället?',
+     'Ni hittar i morgon ett nytt, kraftigt verksamt ämne i en havssvamp som inte går att odla. Vilken strategi satsar ni på, och varför?'],
+    'Droger 8 del V, nya odlingstekniker.')}
+
+  ${fr(4, 'Vem gör egentligen molekylen?', '',
+    ['Tre av modulens ”djurläkemedel” byggs inte av djuret. Vilka tre, och vad bygger dem?',
+     'Hur visade man det i varje fall? Metoderna skiljer sig åt.',
+     'Kursen är indelad i svampar, djur och bakterier. Håller den indelningen?'],
+    'Droger 11, värd och symbiont.')}
+
+  ${fr(5, 'Tre sätt att leta',
+    `<dl class="facts">
+       <div class="frow"><dt>Fleming, 1928</dt><dd>såg en förorenad platta och förstod vad han såg</dd></div>
+       <div class="frow"><dt>Waksman, 1940-talet</dt><dd>tiotusen jordisolat, vart och ett testat mot testbakterier</dd></div>
+       <div class="frow"><dt>Endo, 1970-talet</dt><dd>sextusen svampstammar, testade mot ett <b>renat enzym</b></dd></div>
+     </dl>`,
+    ['Vad kan var och en av metoderna hitta — och vad är den byggd så att den aldrig kan hitta?',
+     'Hade Waksmans metod kunnat hitta lovastatin? Hade Endos metod kunnat hitta penicillin?',
+     'Vilken av de tre liknar mest hur man letar i dag?'],
+    'Droger 11, om hur odlingsbetingelserna styr vad som bildas.')}
+
+  ${fr(6, 'En liten ändring',
+    `<p>Fyra par där ett ämne ur naturen gjordes om till ett bättre läkemedel: penicillin G → penicillin V, lovastatin → simvastatin, avermektin B1 → ivermektin, teprotid (9 aminosyror) → kaptopril.</p>`,
+    ['Vad ändrades kemiskt i varje par, och vad köpte ändringen?',
+     'Ett av paren skiljer sig i <b>art</b>, inte bara i grad, från de andra tre. Vilket, och varför?',
+     'Vilket tycker ni är det skickligaste stycket läkemedelskemi? Motivera.'], '')}
+
+  ${fr(7, 'Skiljetratten avgör',
+    `<p>Fyra ämnen, fyra olika utfall när man skakar med ett organiskt lösningsmedel:</p>
+     <dl class="facts">
+       <div class="frow"><dt>streptomycin</dt><dd>två guanidingrupper (pKa ≈ 12,5)</dd></div>
+       <div class="frow"><dt>doxorubicin</dt><dd>en aminogrupp på aminosockret (pKa ≈ 8–9)</dd></div>
+       <div class="frow"><dt>amfotericin B</dt><dd>en sur <i>och</i> en basisk grupp (amfotär)</dd></div>
+       <div class="frow"><dt>zikonotid</dt><dd>en peptid med 25 byggstenar och många laddningar</dd></div>
+     </dl>`,
+    ['Förutsäg vad som händer med vart och ett, och säg <i>varför</i>.',
+     'Formulera den allmänna regeln i en mening.',
+     'Ni har en ny alkaloid med ett enda basiskt kväve. Beskriv hur ni får ut den ur växtmassan och över i ett rent organiskt skikt.'], '')}
+
+  ${fr(8, 'Planera kampanjen',
+    `<p class="small muted">Det här fallet finns inte i modulen — här går det inte att slå upp något.</p>
+     <blockquote class="sem-fall">Ni odlar fram en bakterie ur ett havssvampdjur. Extraktet dödar <i>Staphylococcus aureus</i> men har ingen effekt alls på <i>E. coli</i>. Aktiviteten överlever kokning. Masspektrometri ger ungefär 1 400. Sur hydrolys ger aminosyror — men flera av dem är inte några av de tjugo som bygger proteiner. Det finns ingen lång kvävefri kolkedja.</blockquote>`,
+    ['Vilken ämnesklass är detta, och vad i uppgifterna säger det?',
+     'Vem byggde ämnet — svampdjuret eller en mikrob? Hur tar ni reda på det?',
+     'Hur kommer det att behöva ges till en patient, och varför?',
+     'Vad är det största skälet till att projektet ändå misslyckas?'], '')}
+
+  ${fr(9, 'De fem sätten att bygga',
+    `<p class="small muted">Gör vi tillsammans på plats.</p>
+     <p>Ni ska kunna skilja på <b>ribosomal peptid, RiPP, NRPS, PKS typ I</b> och <b>PKS typ II</b>, och kunna läsa ut ur en struktur vilket av dem som använts. Fem beskrivningar:</p>
+     <dl class="facts">
+       <div class="frow"><dt>zikonotid</dt><dd>25 vanliga L-aminosyror i en rak kedja, låst av tre disulfidbryggor</dd></div>
+       <div class="frow"><dt>nisin</dt><dd>genkodad och byggd på ribosomen, därefter ombyggd av enzym till lantioninbryggor</dd></div>
+       <div class="frow"><dt>ciklosporin</dt><dd>11 byggstenar i en sluten ring; sju N-metylerade amider, ett D-alanin, och en byggsten (MeBmt) som ingen ribosom har tillgång till</dd></div>
+       <div class="frow"><dt>amfotericin B</dt><dd>en stor laktonring: sju konjugerade dubbelbindningar längs ena sidan, hydroxylgrupper längs den andra</dd></div>
+       <div class="frow"><dt>doxorubicin</dt><dd>en kedja av tio enheter som veckas och sluts till fyra sammansmälta ringar, tre av dem platta och aromatiska</dd></div>
+     </dl>`,
+    ['Placera var och en i rätt klass, och namnge det <b>enda drag</b> som avgör saken.',
+     'Zikonotids disulfidbryggor och nisins ringar sätts båda dit <i>efter</i> att ribosomen är klar. Vilken version av regeln överlever då båda två?',
+     'MeBmt byggs i sin tur av ett polyketidsyntas — inuti en molekyl vi kallar en NRPS-produkt. Hur skarpa är de här fem kategorierna egentligen?'],
+    `Frågan bakom alltihop: vem håller ritningen — genen eller enzymet? Nisin finns inte i modulen, se Droger 11.${BIOSYNTESLANK ? ` <a href="${BIOSYNTESLANK}" target="_blank" rel="noopener">Öva på de fem byggsätten här ↗</a>` : ''}`)}
+
+  <div class="card" style="margin-top:1rem"><div class="btn-row">
+    <button class="btn btn-main" onclick="go('resa')">▶ Till Upptäcktsresan</button>
+    <button class="btn" onclick="go('hem')">🏠 Till startsidan</button>
+  </div></div>`;
+}
+
+/* ============================ övningsfrågor (shelved, not shown) ============================
+   Drafted November 2026 and PARKED — nothing reads this object and nothing renders it. It is
+   here so the work is not lost while the question set is being decided on.
+
+   29 multiple-choice (ratt = 0-based index into alt) and 25 short-answer. English, as drafted
+   and reviewed; they must be translated into Swedish before they can be shown to students.
+   The full answer key, with the reasoning for every distractor, is in PRACTICE_QUESTIONS_EN.md
+   beside this file — the keys below are one-liners. If the two ever disagree, the .md file wins.
+
+   To use them: translate, then either feed them to the quiz engine as a fixed question type or
+   render them on their own page. Neither is wired up. */
+const OVNINGSFRAGOR = {
+  flerval: [
+    { id: 'A1', q: 'A cyclic peptide of eleven residues: seven N-methylated amides, one D-amino acid, one residue not among the twenty common ones. Which machine built it?',
+      alt: ['The ribosome', 'An NRPS', 'A type II polyketide synthase', 'The ribosome, followed by enzymatic tailoring (a RiPP)'], ratt: 1,
+      nyckel: 'Ciclosporin. A RiPP can carry unusual residues, but not one that was never gene-encoded.' },
+    { id: 'A2', q: 'A large lactone ring with seven conjugated double bonds along one side and hydroxyl groups along the other. What, and whose?',
+      alt: ['An aromatic polyketide from a type II PKS', 'A polyene macrolide from a modular type I PKS', 'A cyclic peptide from an NRPS', 'An aminoglycoside, built from sugars'], ratt: 1,
+      nyckel: 'Amphotericin B. Lipophilic polyene side, hydrophilic hydroxyl side — that split lets it sit in a membrane.' },
+    { id: 'A3', q: 'What defines a RiPP?',
+      alt: ['Built without genes at all, by enzymes on an assembly line', 'Gene-encoded and built on the ribosome, but rebuilt by enzymes afterwards', 'Only the twenty common L-amino acids in a straight chain', 'A polyketide with amino acids built into it'], ratt: 1,
+      nyckel: 'Lantibiotics such as nisin: an ordinary ribosomal peptide given lanthionine bridges afterwards.' },
+    { id: 'A4', q: 'Which of these is a ribosomal peptide?',
+      alt: ['Ciclosporin', 'Vancomycin', 'Ziconotide', 'Benzylpenicillin'], ratt: 2,
+      nyckel: 'The conotoxin is gene-encoded; the disulfides are post-translational, not a different machine.' },
+    { id: 'A5', q: 'Streptomycin is neither a peptide nor a polyketide. What is it built from?',
+      alt: ['Isoprene units from the MVA pathway', 'Amino acids from the shikimate pathway', 'Sugar units, with hydroxyls replaced by amino and guanidino groups', 'Acetate units folded into rings'], ratt: 2,
+      nyckel: 'An aminoglycoside built from glucose. Those guanidino groups are what make the extraction awkward (A17).' },
+    { id: 'A6', q: 'Ciclosporin weighs 1202 g/mol, far above the ~500 rule of thumb, and is taken as a tablet anyway. Why?',
+      alt: ['So lipophilic that size does not matter', 'Cyclisation, seven N-methylated nitrogens and a D-amino acid: protease-resistant, with the hydrogen-bonding NH groups hidden', 'Actively taken up by a gut transporter', 'Broken down into fragments that are absorbed and reassembled'], ratt: 1,
+      nyckel: 'Molecular weight explains nothing — compare vancomycin at 1449, which is not absorbed.' },
+    { id: 'A7', q: 'Why must ziconotide be given by pump directly into the cerebrospinal fluid?',
+      alt: ['It is degraded by CYP3A4 in the blood', 'A charged 25-residue peptide: destroyed in the gut and unable to cross the blood-brain barrier', 'It causes too much local tissue damage on injection', 'It has to be mixed with morphine to work'], ratt: 1,
+      nyckel: 'The same property drove the extraction, the column choice and now the route of administration.' },
+    { id: 'A8', q: 'Why are animal venoms nearly always peptides, while animal poisons nearly never are?',
+      alt: ['Venoms are made in glands, poisons in the liver', 'A venom is injected and bypasses the gut, so it may be a peptide; a poison must be eaten and survive stomach acid, so it is usually a small stable non-peptide', 'Poisons are always alkaloids', 'Peptides act faster, and poisons have to act slowly'], ratt: 1,
+      nyckel: 'The venom/poison and the injection/tablet distinctions are the same chemistry from two directions.' },
+    { id: 'A9', q: 'Which genus has given more antibiotics than any other group of organisms?',
+      alt: ['Penicillium', 'Streptomyces', 'Aspergillus', 'Bacillus'], ratt: 1,
+      nyckel: 'From the module: streptomycin, doxorubicin, amphotericin B and ivermectin.' },
+    { id: 'A10', q: 'Why are fungal infections harder to treat selectively than bacterial ones?',
+      alt: ['Fungi grow faster', 'Fungi are eukaryotes and the closest relatives of animals, so their cells resemble ours', 'Fungi have a thicker cell wall', 'Fungi produce beta-lactamase'], ratt: 1,
+      nyckel: 'The more the target resembles something we have, the narrower the therapeutic window.' },
+    { id: 'A11', q: 'Three of the module’s "animal drugs" are not built by the animal. Which one IS?',
+      alt: ['Bryostatin 1', 'Trabectedin', 'Ziconotide', 'MMAE (dolastatin 10)'], ratt: 2,
+      nyckel: 'The cone snail builds its conotoxins itself. The others: two symbionts and one dietary cyanobacterium.' },
+    { id: 'A12', q: 'What does the suffix -mycin signify in a drug name?',
+      alt: ['From a fungus', 'From an actinomycete, usually Streptomyces', 'That it acts on the ribosome', 'That it is a glycoprotein'], ratt: 1,
+      nyckel: '-micin for Micromonospora. Do not be caught by -mucin, which is no antibiotic at all.' },
+    { id: 'A13', q: 'Sponges, bryozoans, tunicates and soil fungi are disproportionately rich sources of drug-like compounds. What do they have in common?',
+      alt: ['They live in nutrient-poor environments', 'They are sessile: unable to flee, they defend themselves and compete for space chemically', 'They all harbour bacterial symbionts', 'They all have unusually large genomes'], ratt: 1,
+      nyckel: 'The single best predictor of where to look for interesting chemistry.' },
+    { id: 'A14', q: 'Why do soil bacteria and soil fungi produce antibiotics at all?',
+      alt: ['To break down organic matter into nutrients', 'They are sessile and crowded, competing for the same substrate — chemical warfare holds ground you cannot leave', 'As waste products of primary metabolism', 'To communicate within the species'], ratt: 1,
+      nyckel: 'A weapon, not a waste product — hence the filamentous, substrate-bound organisms produce the most.' },
+    { id: 'A15', q: 'Building your own toxin is expensive. What is the cheap alternative, and which animals in the module use it?',
+      alt: ['Make it only when threatened — the cone snail', 'Acquire it from a resident symbiont or from the diet — the bryozoan and the sea hare', 'Store it across generations — the Gila monster', 'Make an inactive precursor activated on contact — the jararaca'], ratt: 1,
+      nyckel: 'Containers rather than factories. Acquiring costs almost nothing, so it is the expected outcome.' },
+    { id: 'A16', q: 'Halichondrins occur in several unrelated sponges and no producer has ever been identified. What does that pattern suggest?',
+      alt: ['The compound is an extraction artefact', 'A microorganism, not the sponge, is the likely builder', 'The sponges are more closely related than taxonomy suggests', 'The compound is taken up from seawater'], ratt: 1,
+      nyckel: 'The same reasoning worked for trabectedin, which resembled bacterial safracins long before the symbiont was found.' },
+    { id: 'A17', q: 'Streptomycin carries two guanidino groups (pKa about 12.5). What happens when you shake an extract with an organic solvent?',
+      alt: ['It crosses over if you raise the pH to 9', 'It stays in the aqueous phase at every workable pH; pH is not a handle here', 'It precipitates at the interface', 'It crosses over if you lower the pH to 3'], ratt: 1,
+      nyckel: 'Catch it on a cation exchanger. Contrast doxorubicin, where an ordinary amine makes pH a perfect handle.' },
+    { id: 'A18', q: 'Penicillin’s structure was disputed: nobody believed in the strained four-membered ring. What settled it?',
+      alt: ['Mass spectrometry', 'NMR', 'X-ray crystallography, because the compound crystallises', 'Chemical degradation and comparison with known fragments'], ratt: 2,
+      nyckel: 'Degradation was exactly what had produced the disagreement.' },
+    { id: 'A19', q: 'Bryostatin 1 has had a gram-scale total synthesis since 2017 and still is not a drug. What is that example for?',
+      alt: ['Total synthesis is always too expensive in practice', 'Solving supply is necessary but not sufficient — the benefit has to be there too', 'Symbionts can never be cultured', 'Marine finds are rarely potent enough'], ratt: 1,
+      nyckel: 'Contrast eribulin, where simplification gave a molecule better than the natural product.' },
+    { id: 'A20', q: 'Penicillin’s target is a bacterial cell wall enzyme, absent from humans. Why is allergy still its commonest serious adverse effect?',
+      alt: ['The target is less selective than it appears', 'The reaction is immunological, not mechanistic: the beta-lactam ring haptenises host proteins', 'It is caused by beta-lactamase producers', 'It arises only at high intravenous doses'], ratt: 1,
+      nyckel: 'Mechanism predicts on-target toxicity and nothing else.' },
+    { id: 'A21', q: 'Four drugs, four manufacturing routes. Which is produced recombinantly?',
+      alt: ['Ziconotide', 'Insulin', 'Ivermectin', 'Eribulin'], ratt: 1,
+      nyckel: 'Ziconotide and eribulin by total synthesis; ivermectin semisynthetically from a fermented precursor.' },
+    { id: 'A22', q: 'Vancomycin resistance took about thirty years to appear, unusually long. Why?',
+      alt: ['Vancomycin was barely used in that period', 'The bacterium has to rebuild its own cell wall, D-Ala-D-Ala to D-Ala-D-Lac, rather than alter a single enzyme', 'Vancomycin has several targets at once', 'The gene spreads only by conjugation'], ratt: 1,
+      nyckel: 'Resistance that expensive is slow to establish. Beta-lactamase is one enzyme and spread within years.' },
+    { id: 'A23', q: 'Penicillin, ergotamine and streptomycin were each found in a different way. Match them.',
+      alt: ['Penicillin by screening, ergotamine by serendipity, streptomycin from traditional knowledge', 'Penicillin by serendipity, ergotamine from long-known effects of a poisoning, streptomycin by systematic screening', 'All three by systematic screening, at different scales', 'Penicillin from traditional knowledge, ergotamine by screening, streptomycin by serendipity'], ratt: 1,
+      nyckel: 'Only the third can be planned, which is why Waksman matters more than Fleming for how the industry came to work.' },
+    { id: 'A24', q: 'A cone snail’s venom contains hundreds of structurally similar peptides. What problem does that create, and how is it solved?',
+      alt: ['They are unstable; stabilise by lyophilisation', 'Separating one from many near-identical ones; a separating funnel is useless and reversed-phase HPLC is the tool', 'They interfere with each other; assay the mixture', 'The venom is too dilute; concentrate by evaporation'], ratt: 1,
+      nyckel: 'Conotoxins are tough, not fragile — three disulfides. The difficulty is resolution, not stability.' },
+    { id: 'A25', q: '600 kg of sponge yielded 12.5 mg of halichondrin B. What does a yield like that force on a project?',
+      alt: ['Collecting more sponge', 'Finding a route independent of the animal: culture the real producer, or make the molecule chemically', 'Abandoning the compound', 'Using a more sensitive bioassay'], ratt: 1,
+      nyckel: 'Yields in that range cannot supply a trial, let alone a market. Eribulin is what happened.' },
+    { id: 'A26', q: 'In the 1950s Eli Lilly collected soil samples worldwide, partly through missionaries. What assumption was that built on?',
+      alt: ['Tropical soils are richer in organic matter', 'Different places hold different microbes, so sampling breadth gives chemical breadth', 'Soil from inhabited areas is more promising', 'The same species makes different compounds in different climates'], ratt: 1,
+      nyckel: 'Note what the same programme would require today: prior informed consent and benefit-sharing.' },
+    { id: 'A27', q: 'You discover that a bacterium, not the animal, makes your compound. Why is that good news practically?',
+      alt: ['Bacterial compounds are generally less toxic', 'A bacterium can in principle be fermented, so supply stops depending on harvesting the animal', 'The structure will be simpler', 'It is easier to patent'], ratt: 1,
+      nyckel: 'Necessary but not sufficient: a symbiont often cannot be cultured alone, which is why bryostatin stayed hard.' },
+    { id: 'A28', q: 'For several natural products only part of the molecule carries the activity. What follows for development?',
+      alt: ['The inactive part must be removed before testing', 'A simplified analogue can be easier to make, and sometimes a better drug than the natural product', 'The compound degraded during isolation', 'The compound has several mechanisms of action'], ratt: 1,
+      nyckel: 'Eribulin. The limit: you rarely know early which part is the active one.' },
+    { id: 'A29', q: 'Natural products hit protein targets far more often than randomly chosen synthetic molecules. Why should that be expected?',
+      alt: ['They are larger, and larger molecules bind more readily', 'Selection shaped them to interact with proteins, so they already occupy the right chemical space', 'They are more water-soluble', 'They contain more nitrogen'], ratt: 1,
+      nyckel: 'A compound made at metabolic cost is there because it does something to a protein.' }
+  ],
+  kortsvar: [
+    { id: 'B1', q: 'Which genus has given the most antibiotics? Name two drugs from the module that come from it, and say what each is used for.' },
+    { id: 'B2', q: 'Give an example of a drug that started from a peptide in an animal venom. Describe the observation that led there, what it showed, and how the find was developed into a drug.' },
+    { id: 'B3', q: 'Name three features in a structure that rule out the ribosome as its builder, and explain why.' },
+    { id: 'B4', q: 'What separates PKS type I from PKS type II? Give an example of each from the module, and say what in the structure gives it away.' },
+    { id: 'B5', q: 'What is a RiPP, and why does it complicate the rule "unusual building blocks mean NRPS"? Give an example.' },
+    { id: 'B6', q: 'Why are drugs from animals almost always injected, while drugs from fungi and bacteria can more often be swallowed? Answer at the level of biosynthesis.' },
+    { id: 'B7', q: 'List the five stages of discovering a drug from nature and say in one sentence what each one decides.' },
+    { id: 'B8', q: 'Fleming in 1928, Waksman in the 1940s and Endo in the 1970s looked in three different ways. What could each find, and what was each built so that it could never find?' },
+    { id: 'B9', q: 'Captopril is usually called the first drug produced by rational design. Why is it not a natural product, even though it started in a snake venom?' },
+    { id: 'B10', q: 'Why is it harder to find selective antifungals than selective antibacterials? Use amphotericin B as the example.' },
+    { id: 'B11', q: 'Three of the module’s marine compounds are not built by the animal they were found in. Name them, say who builds them, and how it was shown in each case.' },
+    { id: 'B12', q: 'The module is divided into fungi, bacteria and animals. Give an argument that this division misleads a pharmacist, and propose a better one.' },
+    { id: 'B13', q: 'Why can streptomycin not be extracted with an organic solvent, and how is it purified instead?' },
+    { id: 'B14', q: 'State in one sentence when acid-base extraction works. Give an example from the module where it does not, and say why.' },
+    { id: 'B15', q: 'Set out how you get an alkaloid with a single basic nitrogen out of a plant mash and into a clean organic phase. Why do you wash with hexane first?' },
+    { id: 'B16', q: 'Insulin was the first recombinant drug (1982). What concrete problem did that solve?' },
+    { id: 'B17', q: 'Eribulin contains no material from the sponge and is only half the natural product. What did the sponge actually contribute?' },
+    { id: 'B18', q: 'Nystatin and amphotericin B are in the same class with the same mechanism, yet are used in entirely different ways. Explain.' },
+    { id: 'B19', q: 'Penicillin attacks a structure humans do not have, and is still the drug most likely to cause a serious adverse reaction. Explain the contradiction, and give the general lesson about predicting safety from a mechanism.' },
+    { id: 'B20', q: 'Name one drug from the module made by fermentation, one semisynthetically, one recombinantly and one by total synthesis. For each, say in a clause why that route was chosen.' },
+    { id: 'B21', q: 'The compounds here were found in three different ways: by accident, from effects known for centuries, and by systematic screening. Name one example of each, and say what each route can deliver that the others cannot.' },
+    { id: 'B22', q: 'Soil microbes and sessile marine invertebrates account for a disproportionate share of drugs from nature. Give the ecological argument for why that should be expected.' },
+    { id: 'B23', q: 'Red yeast rice contains the same active compound as a prescription statin. Explain why that is a regulatory problem rather than a chemical one.' },
+    { id: 'B24', q: 'Name three methods of structure determination used in the module. For each, give one thing it can show and one thing it cannot.' },
+    { id: 'B25', q: 'You culture a bacterium from a marine sponge. The extract kills Staphylococcus aureus but not E. coli. Activity survives boiling. MS gives about 1400. Acid hydrolysis yields amino acids, several of them non-proteinogenic, and there is no long nitrogen-free carbon chain. (a) What compound class, and what in the evidence tells you? (b) Who built it, and how would you find out? (c) How will it have to be given, and why?' }
+  ]
+};
+
 /* ============================ navigation ============================ */
-const VIEWS = { hem: viewHome, fakta: viewFakta, quiz: viewQuiz, resa: viewResa, para: viewPara, granskning: viewGranskning };
+/* "Para ihop" was retired in November 2026. The view and its helpers are left in the file
+   below (search for viewPara) but are no longer reachable: no tab, no tile, and no entry
+   here, so go('para') falls through to the start page. To bring it back, add
+   `para: viewPara,` to this object and restore the tab in the header and the tile in
+   viewHome.
+
+   The Quiz was shelved in November 2026, the same way and for a different reason: the
+   question set is being rewritten (see OVNINGSFRAGOR below, and PRACTICE_QUESTIONS_EN.md
+   beside this file). Nothing of the quiz has been deleted — the generators, TEMAN, the
+   question types and the whole engine are untouched further down — it is simply
+   unreachable: no tab, no tile, no entry here, and no button anywhere. To bring it back,
+   add `quiz: viewQuiz,` here and restore the tab in the header and the tile in viewHome.
+   #granskning still reads the quiz data and therefore still works. */
+const VIEWS = { hem: viewHome, fakta: viewFakta, resa: viewResa, mal: viewMal, seminarium: viewSeminarium, biosyntes: viewBiosyntes, granskning: viewGranskning };
 
 /* ============================ granskning (for teachers) ============================
    Open the page with #granskning at the end of the address. Lists everything the quiz uses, straight from the data. */
@@ -3529,6 +3921,10 @@ function viewHome() {
   const gjorda = resaKlara().length;
   app.innerHTML = `<div class="home-grid">
     <div class="card">
+      <!-- The "Vad ska jag kunna?" banner that used to sit here was removed in November 2026:
+           the page is now reachable from the shortcut in the header and from its own tile, so
+           the banner was the third copy on one screen. The .mal-banner styles are left in the
+           stylesheet in case it is wanted back. -->
       <h2>Välkommen!</h2>
       <p>Det här är övningsmaterialet inför seminariet <b>Läkemedel från svampar, djur och bakterier</b>. Här finns kursens ${n} substanser från ${antal('svamp')} svampar, ${antal('bakterie')} bakterier och ${antal('djur')} djur: vilken organism de kommer från, hur de byggs upp, hur de verkar, vad de används till och vad man ska se upp med.</p>
       <div class="borja-har">
@@ -3538,18 +3934,20 @@ function viewHome() {
           <button class="btn" onclick="openValkommen(true)">Vad finns här?</button></div>
       </div>
       <p class="muted small">Ditt resultat sparas bara i din egen webbläsare.</p>
-      ${weakest().length ? `<div class="svaga"><b>🎯 Dina svagaste substanser just nu:</b>
-        ${weakest().map(id => subLink(byId(id))).join(', ')}
-        <div class="btn-row" style="margin-top:.6rem"><button class="btn btn-main" onclick="startFokus(weakest())">Öva på dem</button>
-        <button class="btn" onclick="if(confirm('Nollställa dina resultat?')){store.set('stats',{});store.set('qvikt',{});store.set('antalSvar',0);viewHome()}">↺ Nollställ</button></div></div>`
-      : antalSvar() > 0 && antalSvar() < SVAGA_MIN_TOTALT ? `<p class="small muted svaga">🎯 När du har svarat på ${SVAGA_MIN_TOTALT} frågor visas här vilka substanser du har svårast för (du har svarat på ${antalSvar()}).</p>` : ''}
+      <!-- The "your weakest substances" panel was removed in November 2026 along with the Quiz.
+           Both it and the "once you have answered N questions" line it alternated with were fed
+           by quiz statistics, and its "Öva på dem" button led into the quiz. With the quiz
+           shelved it could only ever have shown stale numbers from an earlier visit and offered
+           a button that goes nowhere. weakest(), antalSvar() and SVAGA_MIN_TOTALT are untouched
+           further down, so restoring this is a matter of putting the block back. -->
     </div>
     <!-- Upptäcktsresan first and marked, since it is the recommended way in -->
     <div class="tiles">
       <button class="tile tile-forst" onclick="go('resa')"><span class="ico">🔬</span><span><b>Upptäcktsresan <span class="tile-mark">börja här</span></b><span class="d">Hur ett läkemedel hittas — från observation till färdigt preparat. ${gjorda} av ${FALL.length} resor gjorda.</span></span></button>
       <button class="tile" onclick="go('fakta')"><span class="ico">📖</span><span><b>Fakta</b><span class="d">Läs om alla substanser, med strukturer och aminosyrasekvenser.</span></span></button>
-      <button class="tile" onclick="go('quiz')"><span class="ico">❓</span><span><b>Quiz</b><span class="d">5–20 flervalsfrågor: källa, mekanism, struktur och resonemang. Välj ett eller flera teman.</span></span></button>
-      <button class="tile" onclick="go('para')"><span class="ico">🔗</span><span><b>Para ihop</b><span class="d">Para ihop substanser med rätt organism eller rätt användning.</span></span></button>
+      <button class="tile" onclick="go('mal')"><span class="ico">🎯</span><span><b>Vad ska jag kunna?</b><span class="d">Modulens syfte, och vad du förväntas kunna när du är klar.</span></span></button>
+      <button class="tile" onclick="oppnaSeminarium()"><span class="ico">💬</span><span><b>Seminariefrågor</b><span class="d">De nio frågorna vi arbetar med på seminariet. Läs dem i förväg.</span></span></button>
+      <button class="tile" onclick="oppnaBiosyntes()"><span class="ico">🧬</span><span><b>Peptid- och polyketidbiosyntes</b><span class="d">Övningsfrågor på hur ribosomen, NRPS och PKS bygger sina molekyler.</span></span></button>
     </div></div>`;
 }
 /* Shown once, the first time the module is opened. `tvinga` reopens it from the start page.
@@ -3561,6 +3959,7 @@ function openValkommen(tvinga) {
   $('#modal-body').innerHTML = `<div class="valkommen">
     <div class="plant-title" style="margin:.2rem 0 1rem">🦠 Läkemedel från svampar, djur och bakterier<span class="sv">Övningsmaterial inför seminariet</span></div>
     <p>Den här sidan är till för att förbereda dig inför seminariet. Den innehåller kursens <b>${SUBSTANSER.length} substanser</b>, var de kommer ifrån, hur organismen bygger dem, hur de verkar och vad de används till.</p>
+    <p>Vad du förväntas kunna står samlat under <b>🎯 Vad ska jag kunna?</b> högst upp på startsidan.</p>
     <div class="borja-har">
       <b>👉 Börja med Upptäcktsresan.</b>
       <p>Där följer du hur ett läkemedel faktiskt hittades, steg för steg: valet av uppslag och bioassay, extraktionen, separationen, strukturbestämningen och vägen fram till ett färdigt preparat. Vid varje steg får du <b>först lära dig hur arbetet går till</b> och sedan använda det på ditt eget fall. Du behöver inte kunna något i förväg, och vilket läkemedel det blir får du veta först på slutet.</p>
@@ -3568,8 +3967,6 @@ function openValkommen(tvinga) {
     <p>Resten av sidan är till för att nöta in detaljerna när du förstått sammanhanget:</p>
     <dl class="facts">
       <div class="frow"><dt>📖 Fakta</dt><dd>Faktablad för varje substans, med strukturer, biosyntes och aminosyrasekvenser. Börja gärna med <b>Översikt</b>, som förklarar hur mikrober och djur bygger sina molekyler på olika sätt.</dd></div>
-      <div class="frow"><dt>❓ Quiz</dt><dd>5–20 frågor i åtta teman, från rena faktakontroller till frågor där du måste jämföra substanser och dra slutsatser. Allt är flerval — inga latinska namn att stava ur minnet. Frågor du svarat fel på kommer tillbaka oftare.</dd></div>
-      <div class="frow"><dt>🔗 Para ihop</dt><dd>Snabbövning: substans mot organism, eller substans mot användning.</dd></div>
     </dl>
     <p class="small muted">Allt du gör sparas bara i din egen webbläsare — ingenting skickas någonstans, och ingen ser dina resultat.</p>
     <div class="btn-row"><button class="btn btn-main" onclick="closeModal();go('resa')">▶ Börja med Upptäcktsresan</button>
