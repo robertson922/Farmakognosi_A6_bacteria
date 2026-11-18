@@ -3525,7 +3525,7 @@ function viewMal() {
     </div>
 
     <h3>1. Skilja på de fem sätten att bygga</h3>
-    <p><b>Ribosomal peptid, RiPP, NRPS, PKS typ I och PKS typ II.</b> Du ska kunna hålla isär dem, och kunna se på en struktur vilket av dem som använts. Det är inget du lär dig på ett ställe — begreppen återkommer genom hela kursen, och i den här modulen i varje del av den.${BIOSYNTESLANK ? ` <a href="${BIOSYNTESLANK}" target="_blank" rel="noopener">Öva på att känna igen dem här ↗</a>` : ''}</p>
+    <p><b>Ribosomal peptid, RiPP, NRPS, PKS typ I och PKS typ II.</b> Du ska kunna hålla isär dem, och kunna se på en struktur vilket av dem som använts. Det är inget du lär dig på ett ställe — begreppen återkommer genom hela kursen, och i den här modulen i varje del av den.${BIOSYNTESLANK ? ` <a href="${BIOSYNTESLANK}" target="_blank" rel="noopener">Öva i <b>Läs strukturen</b> ↗</a>` : ''}</p>
 
     <h3>2. Förklara varför källan spelar roll</h3>
     <p>Varför svampar, bakterier och djur ger andra sorters molekyler än växter — och än varandra — och vad det får för följder för läkemedlet: hur det måste ges, och hur det kan tillverkas.</p>
@@ -3544,7 +3544,7 @@ function viewMal() {
   </div>`;
 }
 
-/* ============================ peptid- och polyketidbiosyntes ============================
+/* ============================ Läs strukturen (extern övning) ============================
    Övningsfrågorna om ribosomala peptider, RiPP, NRPS och PKS ligger på en egen sida. Adressen
    står i BIOSYNTESLANK: brickan på startsidan, länken i målsidans avsnitt 1 och länken i
    seminariefråga 9 öppnar den i en ny flik. Töms strängen visar brickan viewBiosyntes här
@@ -3556,7 +3556,7 @@ function oppnaBiosyntes() {
 }
 function viewBiosyntes() {
   app.innerHTML = `<div class="card">
-    <h2>🧬 Peptid- och polyketidbiosyntes — övningsfrågor</h2>
+    <h2>🧬 Läs strukturen</h2>
     <p>Övningsfrågorna på hur ribosomen, NRPS och PKS bygger sina molekyler ligger inte här ännu. De läggs till inför seminariet.</p>
     <p>Under tiden finns samma sak att läsa i modulen: <b>Översikt</b> under Fakta går igenom skillnaden mellan byggsätten.</p>
     <div class="btn-row">
@@ -3676,7 +3676,7 @@ function viewSeminarium() {
     ['Placera var och en i rätt klass, och namnge det <b>enda drag</b> som avgör saken.',
      'Zikonotids disulfidbryggor och nisins ringar sätts båda dit <i>efter</i> att ribosomen är klar. Vilken version av regeln överlever då båda två?',
      'MeBmt byggs i sin tur av ett polyketidsyntas — inuti en molekyl vi kallar en NRPS-produkt. Hur skarpa är de här fem kategorierna egentligen?'],
-    `Frågan bakom alltihop: vem håller ritningen — genen eller enzymet? Nisin finns inte i modulen, se Droger 11.${BIOSYNTESLANK ? ` <a href="${BIOSYNTESLANK}" target="_blank" rel="noopener">Öva på de fem byggsätten här ↗</a>` : ''}`)}
+    `Frågan bakom alltihop: vem håller ritningen — genen eller enzymet? Nisin finns inte i modulen, se Droger 11.${BIOSYNTESLANK ? ` <a href="${BIOSYNTESLANK}" target="_blank" rel="noopener">Öva i <b>Läs strukturen</b> ↗</a>` : ''}`)}
 
   <div class="card" style="margin-top:1rem"><div class="btn-row">
     <button class="btn btn-main" onclick="go('resa')">▶ Till Upptäcktsresan</button>
@@ -3929,7 +3929,7 @@ function viewHome() {
       <p>Det här är övningsmaterialet inför seminariet <b>Läkemedel från svampar, djur och bakterier</b>. Här finns kursens ${n} substanser från ${antal('svamp')} svampar, ${antal('bakterie')} bakterier och ${antal('djur')} djur: vilken organism de kommer från, hur de byggs upp, hur de verkar, vad de används till och vad man ska se upp med.</p>
       <div class="borja-har">
         <b>👉 Börja med Upptäcktsresan.</b>
-        <p>Där går du igenom hur ett läkemedel faktiskt hittas — från observation till färdigt preparat, och gör varje steg själv på ett riktigt fall. <b>Du behöver inte kunna något i förväg.</b> Resten av sidan är till för att nöta in detaljerna efteråt.</p>
+        <p>Där går du igenom hur ett läkemedel faktiskt hittas — från observation till färdigt preparat, och gör varje steg själv på ett riktigt fall. <b>Du behöver inte kunna något i förväg.</b> Resten av sidan — faktablad, seminariefrågor och strukturövning — använder du efteråt.</p>
         <div class="btn-row"><button class="btn btn-main" onclick="go('resa')">▶ ${gjorda ? `Fortsätt Upptäcktsresan (${gjorda} av ${FALL.length} klara)` : 'Börja Upptäcktsresan'}</button>
           <button class="btn" onclick="openValkommen(true)">Vad finns här?</button></div>
       </div>
@@ -3947,26 +3947,28 @@ function viewHome() {
       <button class="tile" onclick="go('fakta')"><span class="ico">📖</span><span><b>Fakta</b><span class="d">Läs om alla substanser, med strukturer och aminosyrasekvenser.</span></span></button>
       <button class="tile" onclick="go('mal')"><span class="ico">🎯</span><span><b>Vad ska jag kunna?</b><span class="d">Modulens syfte, och vad du förväntas kunna när du är klar.</span></span></button>
       <button class="tile" onclick="oppnaSeminarium()"><span class="ico">💬</span><span><b>Seminariefrågor</b><span class="d">De nio frågorna vi arbetar med på seminariet. Läs dem i förväg.</span></span></button>
-      <button class="tile" onclick="oppnaBiosyntes()"><span class="ico">🧬</span><span><b>Peptid- och polyketidbiosyntes</b><span class="d">Övningsfrågor på hur ribosomen, NRPS och PKS bygger sina molekyler.</span></span></button>
+      <button class="tile" onclick="oppnaBiosyntes()"><span class="ico">🧬</span><span><b>Läs strukturen</b><span class="d">Vilket maskineri byggde molekylen? Öva på ribosomen, RiPP, NRPS och PKS.</span></span></button>
     </div></div>`;
 }
 /* Shown once, the first time the module is opened. `tvinga` reopens it from the start page.
    The version string means the greeting can be shown again if it is ever rewritten. */
-const VALKOMMEN = 'v1';
+const VALKOMMEN = 'v2';   // v2, november 2026: quiz och Para ihop borta, Seminariefrågor och Läs strukturen tillkomna
 function openValkommen(tvinga) {
   if (!tvinga && store.get('valkommen', '') === VALKOMMEN) return;
   store.set('valkommen', VALKOMMEN);
   $('#modal-body').innerHTML = `<div class="valkommen">
     <div class="plant-title" style="margin:.2rem 0 1rem">🦠 Läkemedel från svampar, djur och bakterier<span class="sv">Övningsmaterial inför seminariet</span></div>
     <p>Den här sidan är till för att förbereda dig inför seminariet. Den innehåller kursens <b>${SUBSTANSER.length} substanser</b>, var de kommer ifrån, hur organismen bygger dem, hur de verkar och vad de används till.</p>
-    <p>Vad du förväntas kunna står samlat under <b>🎯 Vad ska jag kunna?</b> högst upp på startsidan.</p>
+    <p>Vad du förväntas kunna står samlat under <b>🎯 Vad ska jag kunna?</b> på startsidan.</p>
     <div class="borja-har">
       <b>👉 Börja med Upptäcktsresan.</b>
       <p>Där följer du hur ett läkemedel faktiskt hittades, steg för steg: valet av uppslag och bioassay, extraktionen, separationen, strukturbestämningen och vägen fram till ett färdigt preparat. Vid varje steg får du <b>först lära dig hur arbetet går till</b> och sedan använda det på ditt eget fall. Du behöver inte kunna något i förväg, och vilket läkemedel det blir får du veta först på slutet.</p>
     </div>
-    <p>Resten av sidan är till för att nöta in detaljerna när du förstått sammanhanget:</p>
+    <p>Resten av sidan använder du när du förstått sammanhanget:</p>
     <dl class="facts">
       <div class="frow"><dt>📖 Fakta</dt><dd>Faktablad för varje substans, med strukturer, biosyntes och aminosyrasekvenser. Börja gärna med <b>Översikt</b>, som förklarar hur mikrober och djur bygger sina molekyler på olika sätt.</dd></div>
+      <div class="frow"><dt>💬 Seminariefrågor</dt><dd>De nio frågorna vi arbetar med på seminariet. Läs dem i förväg — de är tänkta att diskuteras, inte slås upp.</dd></div>
+      <div class="frow"><dt>🧬 Läs strukturen</dt><dd>Övning i att se på en molekyl och avgöra vilket maskineri som byggde den: ribosomen, RiPP, NRPS eller PKS.</dd></div>
     </dl>
     <p class="small muted">Allt du gör sparas bara i din egen webbläsare — ingenting skickas någonstans, och ingen ser dina resultat.</p>
     <div class="btn-row"><button class="btn btn-main" onclick="closeModal();go('resa')">▶ Börja med Upptäcktsresan</button>
