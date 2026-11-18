@@ -3993,9 +3993,9 @@ const sorted = () => ['svamp', 'bakterie', 'djur'].flatMap(g => SUBSTANSER.filte
 const FAKTA_SEKTIONER = [
   { key: 'svamp',    ikon: GRUPP.svamp.ikon,    rubrik: GRUPP.svamp.pl,     test: s => s.grupp === 'svamp' },
   { key: 'bakterie', ikon: GRUPP.bakterie.ikon, rubrik: GRUPP.bakterie.pl,  test: s => s.grupp === 'bakterie' },
-  { key: 'djur',     ikon: SPAR.djur.ikon,      rubrik: 'Djur',             under: 'ribosomala peptider',
+  { key: 'djur',     ikon: SPAR.djur.ikon,      rubrik: 'Djur',
     test: s => s.grupp === 'djur' && (s.spar || 'djur') === 'djur' },
-  { key: 'marin',    ikon: SPAR.marin.ikon,     rubrik: 'Havets djur',      under: 'polyketider och peptider, ofta från en symbiont',
+  { key: 'marin',    ikon: SPAR.marin.ikon,     rubrik: 'Havets djur',
     test: s => s.grupp === 'djur' && s.spar === 'marin' },
 ];
 
@@ -4045,8 +4045,11 @@ function viewFakta() {
     <p id="fnone" class="muted" hidden>Inget matchar sökningen.</p>`;
   $('#fsok').addEventListener('input', e => {
     const q = e.target.value.trim().toLowerCase(); let n = 0;
-    document.querySelectorAll('#flist details').forEach(d => { const ok = !q || d.dataset.text.includes(q); d.hidden = !ok; if (ok) n++; });
-    document.querySelectorAll('#flist .list-h').forEach(h => h.hidden = ![...document.querySelectorAll(`#flist details[data-g="${h.dataset.g}"]`)].some(d => !d.hidden));
+    /* Only the substance cards, which are direct children of #flist and carry data-text. Each
+       card's body contains a nested <details class="kallor">, and matching those too made
+       d.dataset.text undefined, which threw and left the whole list unfiltered on phones. */
+    document.querySelectorAll('#flist > details').forEach(d => { const ok = !q || (d.dataset.text || '').includes(q); d.hidden = !ok; if (ok) n++; });
+    document.querySelectorAll('#flist .list-h').forEach(h => h.hidden = ![...document.querySelectorAll(`#flist > details[data-g="${h.dataset.g}"]`)].some(d => !d.hidden));
     $('#fnone').hidden = n > 0;
   });
 }
