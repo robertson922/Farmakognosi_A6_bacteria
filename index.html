@@ -97,7 +97,12 @@ p { margin: .3rem 0 .7rem; }
 .btn-row .btn { flex: 1 1 10rem; }
 
 /* home tiles */
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .8rem; margin-top: 1rem; }
+/* Exactly four tiles, so the column count is set outright rather than left to auto-fit, which
+   gave an untidy 3 + 1 on tablets: one column on a phone, 2 x 2 in between, four across from
+   1024px up. If a fifth tile is ever added, these three rules are what to revisit. */
+.tiles { display: grid; grid-template-columns: 1fr; gap: .8rem; margin-top: 1rem; }
+@media (min-width: 600px)  { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .tile { text-align: left; background: var(--panel); border: 2px solid var(--panel2); border-radius: 1rem; padding: 1rem; display: flex; gap: .9rem; align-items: flex-start; }
 .tile:hover { border-color: var(--acc); background: #22324a; }
 .tile .ico { font-size: 1.9rem; line-height: 1; }
@@ -394,6 +399,16 @@ details.plant .body { padding: 0 1rem 1rem; }
    what gets split into two columns (see the desktop block), which keeps the line length
    readable while still using the width. Narrowing the box instead just leaves a gutter. */
 .larom-ensam { padding: 1.1rem 1.4rem; }
+/* The stage text shown in the dialog from the Upptäcktsresan front page. It fills the whole
+   dialog, so on a wide screen it splits into columns rather than running 115 characters to the
+   line. Kept separate from .larom-ensam, which is tied to the journey pages' own layout. */
+.larom-modal { padding: 1.1rem 1.4rem; }
+@media (min-width: 900px) {
+  .larom-modal { columns: 26rem; column-gap: 2.75rem; column-rule: 1px solid var(--panel2); }
+  .larom-modal > *:first-child { margin-top: 0; }
+  .larom-modal p, .larom-modal li, .larom-modal ul, .larom-modal ol { break-inside: avoid; }
+  .larom-modal p > b:only-child { break-after: avoid; }
+}
 .larom-ensam .larom-text { max-width: none; }
 /* the solvent list on the extraction stage */
 .losningsmedel { margin: .6rem 0 1rem; }
@@ -423,9 +438,17 @@ details.plant .body { padding: 0 1rem 1rem; }
 /* the five stages, shown as a map on the start page and as a strip during a run */
 .faskarta { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .5rem; margin-top: 1rem; align-items: stretch; }
 /* the number is a full-height block down the left edge, with the two lines of text beside it */
+/* A button since November 2026: clicking a stage opens that stage's teaching text (FASER[].larom)
+   in the modal, so the five steps can be read before starting a journey. */
 .faskort { border: 1px solid var(--panel2); border-radius: .7rem; padding: .7rem .85rem; background: var(--bg);
-  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: .75rem; row-gap: .15rem; align-items: center; }
-.faskort b { grid-column: 2; align-self: end; font-size: .95rem; color: #fff; line-height: 1.25; }
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: .75rem; row-gap: .15rem; align-items: center;
+  width: 100%; text-align: left; }
+.faskort:hover { border-color: var(--acc); background: #22324a; }
+/* "Strukturbestämning" is one unbreakable word wider than the card at five columns, so it spilled
+   into the next one. The document is lang="sv", so hyphens:auto breaks it where Swedish allows;
+   overflow-wrap is the fallback for browsers without Swedish hyphenation patterns. */
+.faskort b { grid-column: 2; align-self: end; font-size: .95rem; color: #fff; line-height: 1.25;
+  hyphens: auto; overflow-wrap: break-word; }
 .faskort > span:not(.nr) { grid-column: 2; align-self: start; font-size: .85rem; color: var(--muted); line-height: 1.3; }
 .faslista { display: flex; flex-wrap: wrap; gap: .3rem .5rem; list-style: none; padding: 0; margin: .1rem 0 .9rem; font-size: .78rem; }
 .faslista li { color: var(--muted); }
@@ -640,9 +663,8 @@ ul.begrepp li { margin: .1rem 0; }
   .resa-logg .maste { position: sticky; top: 5.5rem; }
   /* in a column this narrow the label must sit ABOVE its text, not beside it */
   .resa-logg .maste .mrow { grid-template-columns: 1fr; gap: .1rem; padding: .45rem 0; }
-  /* the five stages and the five tiles fit on one row instead of wrapping 4 + 1 */
+  /* the five stages fit on one row instead of wrapping 4 + 1 */
   .faskarta { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .home-grid .tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .resval { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 }
 /* On a 13" laptop the heading plus six tabs is just too wide for one row; trimming both a
@@ -676,8 +698,7 @@ a.doi:hover { text-decoration: underline; }
       <button class="tab" data-view="resa">🔬 Upptäcktsresan</button>
       <span class="genvagar">
         <button class="genvag" onclick="go('mal')" title="Vad ska jag kunna?">🎯 Mål</button>
-        <button class="genvag" onclick="go('seminarium')" title="Seminariefrågor">💬 Seminarium</button>
-      </span>
+        </span>
     </nav>
   </div>
 </header>
@@ -3525,7 +3546,7 @@ function viewMal() {
     </div>
 
     <h3>1. Skilja på de fem sätten att bygga</h3>
-    <p><b>Ribosomal peptid, RiPP, NRPS, PKS typ I och PKS typ II.</b> Du ska kunna hålla isär dem, och kunna se på en struktur vilket av dem som använts. Det är inget du lär dig på ett ställe — begreppen återkommer genom hela kursen, och i den här modulen i varje del av den.${BIOSYNTESLANK ? ` <a href="${BIOSYNTESLANK}" target="_blank" rel="noopener">Öva i <b>Läs strukturen</b> ↗</a>` : ''}</p>
+    <p><b>Ribosomal peptid, RiPP, NRPS, PKS typ I och PKS typ II.</b> Du ska kunna hålla isär dem, och kunna se på en struktur vilket av dem som använts.${BIOSYNTESLANK ? ` <a href="${BIOSYNTESLANK}" target="_blank" rel="noopener">Öva i <b>Läs strukturen</b> ↗</a>` : ''}</p>
 
     <h3>2. Förklara varför källan spelar roll</h3>
     <p>Varför svampar, bakterier och djur ger andra sorters molekyler än växter — och än varandra — och vad det får för följder för läkemedlet: hur det måste ges, och hur det kan tillverkas.</p>
@@ -3929,7 +3950,7 @@ function viewHome() {
       <p>Det här är övningsmaterialet inför seminariet <b>Läkemedel från svampar, djur och bakterier</b>. Här finns kursens ${n} substanser från ${antal('svamp')} svampar, ${antal('bakterie')} bakterier och ${antal('djur')} djur: vilken organism de kommer från, hur de byggs upp, hur de verkar, vad de används till och vad man ska se upp med.</p>
       <div class="borja-har">
         <b>👉 Börja med Upptäcktsresan.</b>
-        <p>Där går du igenom hur ett läkemedel faktiskt hittas — från observation till färdigt preparat, och gör varje steg själv på ett riktigt fall. <b>Du behöver inte kunna något i förväg.</b> Resten av sidan — faktablad, seminariefrågor och strukturövning — använder du efteråt.</p>
+        <p>Där går du igenom hur ett läkemedel faktiskt hittas — från observation till färdigt preparat, och gör varje steg själv på ett riktigt fall. <b>Du behöver inte kunna något i förväg.</b> Resten av sidan — faktablad och strukturövning — använder du efteråt.</p>
         <div class="btn-row"><button class="btn btn-main" onclick="go('resa')">▶ ${gjorda ? `Fortsätt Upptäcktsresan (${gjorda} av ${FALL.length} klara)` : 'Börja Upptäcktsresan'}</button>
           <button class="btn" onclick="openValkommen(true)">Vad finns här?</button></div>
       </div>
@@ -3946,7 +3967,6 @@ function viewHome() {
       <button class="tile tile-forst" onclick="go('resa')"><span class="ico">🔬</span><span><b>Upptäcktsresan <span class="tile-mark">börja här</span></b><span class="d">Hur ett läkemedel hittas — från observation till färdigt preparat. ${gjorda} av ${FALL.length} resor gjorda.</span></span></button>
       <button class="tile" onclick="go('fakta')"><span class="ico">📖</span><span><b>Fakta</b><span class="d">Läs om alla substanser, med strukturer och aminosyrasekvenser.</span></span></button>
       <button class="tile" onclick="go('mal')"><span class="ico">🎯</span><span><b>Vad ska jag kunna?</b><span class="d">Modulens syfte, och vad du förväntas kunna när du är klar.</span></span></button>
-      <button class="tile" onclick="oppnaSeminarium()"><span class="ico">💬</span><span><b>Seminariefrågor</b><span class="d">De nio frågorna vi arbetar med på seminariet. Läs dem i förväg.</span></span></button>
       <button class="tile" onclick="oppnaBiosyntes()"><span class="ico">🧬</span><span><b>Läs strukturen</b><span class="d">Vilket maskineri byggde molekylen? Öva på ribosomen, RiPP, NRPS och PKS.</span></span></button>
     </div></div>`;
 }
@@ -3967,7 +3987,6 @@ function openValkommen(tvinga) {
     <p>Resten av sidan använder du när du förstått sammanhanget:</p>
     <dl class="facts">
       <div class="frow"><dt>📖 Fakta</dt><dd>Faktablad för varje substans, med strukturer, biosyntes och aminosyrasekvenser. Börja gärna med <b>Översikt</b>, som förklarar hur mikrober och djur bygger sina molekyler på olika sätt.</dd></div>
-      <div class="frow"><dt>💬 Seminariefrågor</dt><dd>De nio frågorna vi arbetar med på seminariet. Läs dem i förväg — de är tänkta att diskuteras, inte slås upp.</dd></div>
       <div class="frow"><dt>🧬 Läs strukturen</dt><dd>Övning i att se på en molekyl och avgöra vilket maskineri som byggde den: ribosomen, RiPP, NRPS eller PKS.</dd></div>
     </dl>
     <p class="small muted">Allt du gör sparas bara i din egen webbläsare — ingenting skickas någonstans, och ingen ser dina resultat.</p>
@@ -4707,6 +4726,20 @@ const poang = () => resa.steg.reduce((n, s, i) => n + (s && s.vald !== null && s
    - jordprov → renkultur → hämningszon (FIG.labbsteg) bara när källan ÄR en mikrob;
      för ormgift, snäckgift och bukspottkörtel vore den bilden obegriplig.
    FIG innehåller fortfarande diagram för de övriga stegen; de visas inte just nu. */
+/* The five stage cards on the Upptäcktsresan front page open this. It shows the same teaching
+   text the journeys show before each question, so a student can read the method through without
+   starting a case. Deliberately does not use figurDelar(), which needs an active journey. */
+function oppnaFas(i) {
+  const fas = FASER[i];
+  if (!fas) return;
+  $('#modal-body').innerHTML = `<h2 style="margin:.2rem 0 .1rem">Steg ${i + 1} · ${fas.rubrik}</h2>
+    <p class="muted" style="margin:0 0 .9rem">${fas.kort}</p>
+    <div class="stegbild-wrap"><img class="stegbild" src="img/steg-${fas.key}.jpg" alt=""
+      onerror="this.closest('.stegbild-wrap').remove()"></div>
+    <div class="larom larom-modal">${fas.larom}</div>`;
+  openModal();
+}
+
 function figurDelar(key) {
   const s = byId(uOf().sub);
   return {
@@ -4793,7 +4826,8 @@ function viewResa() {
     <p>Hur blir en mögelsvamp eller ett ormgift till ett läkemedel? Här går du hela vägen, steg för steg, tillsammans med den som gjorde upptäckten.</p>
     <p>Vid varje steg får du <b>först lära dig hur arbetet går till</b> — hur man prövar ett uppslag och bygger en bioassay, hur man extraherar, vilka separationsmetoder som finns och hur en struktur bestäms, och sedan använda det på ditt eget fall. <b>Du behöver inte kunna något i förväg:</b> allt du behöver för att svara står på skärmen, och du kan när som helst gå tillbaka och läsa om.</p>
     <p class="muted small">Vilket läkemedel det blir får du veta först på slutet.</p>
-    <div class="faskarta">${FASER.map((f, i) => `<div class="faskort"><span class="nr">${i + 1}</span><b>${f.rubrik}</b><span>${f.kort}</span></div>`).join('')}</div>
+    <div class="faskarta">${FASER.map((f, i) => `<button class="faskort" onclick="oppnaFas(${i})" aria-label="Läs om ${f.rubrik}"><span class="nr">${i + 1}</span><b>${f.rubrik}</b><span>${f.kort}</span></button>`).join('')}</div>
+    <p class="small muted" style="margin:.5rem 0 0">Klicka på ett steg för att läsa hur det går till. Samma genomgång möter dig i varje resa, innan frågan.</p>
     <div class="progress" style="margin-top:1rem"><div style="width:${alla.length ? klara.filter(id => alla.includes(id)).length / alla.length * 100 : 0}%"></div></div>
     <p class="small muted">Du har gått igenom ${klara.filter(id => alla.includes(id)).length} av ${alla.length} resor.
       ${klara.length ? `<button class="linkbtn" style="margin-left:.4rem" onclick="if(confirm('Nollställa vilka resor du gått igenom? Då visas också genomgångarna av stegen igen.')){store.set('resor',[]);store.set('larda',[]);viewResa()}">↺ Nollställ</button>` : ''}</p>
