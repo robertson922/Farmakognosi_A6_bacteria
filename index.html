@@ -425,10 +425,11 @@ details.plant .body { padding: 0 1rem 1rem; }
 .larom p:last-child, .larom ul:last-child { margin-bottom: 0; }
 .larom ul { margin: .3rem 0 .7rem; padding-left: 1.2rem; }
 .larom li { margin: .25rem 0; }
-/* this is the only way back to the teaching text once a stage has been seen, so it has to
-   look like something you can press rather than a line of small print */
-.repetera { margin: 1rem 0 .8rem; border: 1px dashed var(--line); border-radius: .8rem; background: rgba(15,23,42,.45); }
-.repetera summary { cursor: pointer; color: var(--acc-hi); font-weight: 700; font-size: .92rem; padding: .6rem .85rem; list-style: none; }
+/* Since the teaching page stopped opening by itself, this is the ONLY route to it inside a
+   journey, so it has to read as an offer of help rather than as small print. Solid border and a
+   faint accent wash: visible without competing with the answer buttons beside it. */
+.repetera { margin: 1rem 0 .8rem; border: 1px solid var(--line); border-radius: .8rem; background: var(--acc-bg); }
+.repetera summary { cursor: pointer; color: var(--acc-hi); font-weight: 700; font-size: .95rem; padding: .65rem .85rem; list-style: none; }
 .repetera summary::-webkit-details-marker { display: none; }
 .repetera summary:hover { color: var(--acc); background: var(--panel2); border-radius: .75rem; }
 .repetera[open] { border-style: solid; }
@@ -3982,7 +3983,7 @@ function openValkommen(tvinga) {
     <p>Vad du förväntas kunna står samlat under <b>🎯 Vad ska jag kunna?</b> på startsidan.</p>
     <div class="borja-har">
       <b>👉 Börja med Upptäcktsresan.</b>
-      <p>Där följer du hur ett läkemedel faktiskt hittades, steg för steg: valet av uppslag och bioassay, extraktionen, separationen, strukturbestämningen och vägen fram till ett färdigt preparat. Vid varje steg får du <b>först lära dig hur arbetet går till</b> och sedan använda det på ditt eget fall. Du behöver inte kunna något i förväg, och vilket läkemedel det blir får du veta först på slutet.</p>
+      <p>Där följer du hur ett läkemedel faktiskt hittades, steg för steg: valet av uppslag och bioassay, extraktionen, separationen, strukturbestämningen och vägen fram till ett färdigt preparat. Du <b>behöver inte kunna något i förväg</b> — allt du behöver för att svara står på skärmen, och genomgången av hur arbetet går till finns vid varje steg om du vill läsa den. Vilket läkemedel det blir får du veta först på slutet.</p>
     </div>
     <p>Resten av sidan använder du när du förstått sammanhanget:</p>
     <dl class="facts">
@@ -4824,7 +4825,7 @@ function viewResa() {
   app.innerHTML = `<div class="card">
     <h2>🔬 Upptäcktsresan</h2>
     <p>Hur blir en mögelsvamp eller ett ormgift till ett läkemedel? Här går du hela vägen, steg för steg, tillsammans med den som gjorde upptäckten.</p>
-    <p>Vid varje steg får du <b>först lära dig hur arbetet går till</b> — hur man prövar ett uppslag och bygger en bioassay, hur man extraherar, vilka separationsmetoder som finns och hur en struktur bestäms, och sedan använda det på ditt eget fall. <b>Du behöver inte kunna något i förväg:</b> allt du behöver för att svara står på skärmen, och du kan när som helst gå tillbaka och läsa om.</p>
+    <p>Du börjar direkt med fallet och <b>behöver inte kunna något i förväg</b> — allt du behöver för att svara står på skärmen. Vid varje steg finns dessutom hela genomgången av hur arbetet går till, ett klick bort: hur man prövar ett uppslag och bygger en bioassay, hur man extraherar, vilka separationsmetoder som finns och hur en struktur bestäms. Läs den när du vill, före eller efter att du svarat.</p>
     <p class="muted small">Vilket läkemedel det blir får du veta först på slutet.</p>
     <div class="faskarta">${FASER.map((f, i) => `<button class="faskort" onclick="oppnaFas(${i})" aria-label="Läs om ${f.rubrik}"><span class="nr">${i + 1}</span><b>${f.rubrik}</b><span>${f.kort}</span></button>`).join('')}</div>
     <p class="small muted" style="margin:.5rem 0 0">Klicka på ett steg för att läsa hur det går till. Samma genomgång möter dig i varje resa, innan frågan.</p>
@@ -4877,8 +4878,13 @@ function markLard(i) {
   const l = lardaSteg(), k = FASER[i].key;
   if (!l.includes(k)) { l.push(k); store.set('larda', l); }
 }
-// which view a stage should open on: its teaching page only if that stage is still unseen
-const startVy = i => (svarat(i) || arLard(i)) ? 'fraga' : 'larom';
+/* Stages always open on the question (November 2026). The teaching page used to open first for
+   any stage not yet seen, which in practice meant the whole of a student's FIRST journey was five
+   walls of text before they got to do anything. The text itself is unchanged and is one click
+   away at every stage — see the .repetera box in the question view — and the five cards on the
+   Upptäcktsresan front page open the same thing. To restore the old behaviour, put back:
+   (svarat(i) || arLard(i)) ? 'fraga' : 'larom'. The 'larom' branch of renderResa still works. */
+const startVy = i => 'fraga';
 /* Rebuild a finished run for review. The journal is written from FYND, not from what was
    clicked, so filling in the correct answer for every stage reproduces exactly the summary
    the student saw when they finished — without pretending to remember their actual answers. */
@@ -4961,7 +4967,7 @@ function renderResa() {
         <div class="q-text">${st.fraga}</div>
         <div class="opts">${mitt.val.map((o, k) => `<button class="opt" data-k="${k}">${o.html}</button>`).join('')}</div>
         <div id="rfb"></div>
-        <details class="repetera"><summary>🤔 Jag har glömt — påminn mig om hur ${fas.rubrik.toLowerCase()} går till</summary><div class="larom">${fas.larom}</div></details>
+        <details class="repetera"><summary>📖 Hur går ${fas.rubrik.toLowerCase()} till? Läs genomgången här</summary><div class="larom">${fas.larom}</div></details>
       </div>
     </div>
     <div class="btn-row" id="rbakwrap">${tillbaka}</div></div>`;
